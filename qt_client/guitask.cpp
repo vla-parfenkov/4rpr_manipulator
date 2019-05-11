@@ -6,7 +6,7 @@ GUITask::GUITask(QObject *parent) :
     currentY(0),
     currentAngle(0)
 {
-
+    conn =  std::make_unique<MCUConnection>();
 }
 
 void GUITask::handleMove(MoveDirection direction, uint32_t speed)
@@ -16,14 +16,14 @@ void GUITask::handleMove(MoveDirection direction, uint32_t speed)
         case MoveUp:
         {
             int32_t newXpossition = currentX + static_cast<int32_t>(speed * GUITaskConstant::diskret);
-            //sendCmd
+            conn->sendCmd("TestUsartSetLCD");
             currentX = newXpossition;
             break;
         }
     case MoveDown:
     {
         int32_t newXpossition = currentX - static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        //sendCmd
+        conn->sendCmd("TestUsartResetLCD");
         currentX = newXpossition;
         break;
     }
@@ -59,4 +59,20 @@ void GUITask::handleMove(MoveDirection direction, uint32_t speed)
         return;
     }
     emit changePosition(currentX, currentY, currentAngle);
+}
+
+void GUITask::connectToMCU()
+{
+    try {
+        conn->connect();
+    } catch (const std::logic_error &ex)
+    {
+        emit errorTask(ex.what());
+    }
+
+}
+
+void GUITask::handleGoToPosition()
+{
+    conn->sendCmd("TestUsart");
 }

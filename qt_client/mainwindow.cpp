@@ -1,14 +1,16 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include<QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow())
 {
-    conn =  std::make_unique<MCUConnection>();
     handler = std::make_unique<GUITask>();
     QObject::connect(handler.get(), SIGNAL(changePosition(int32_t, int32_t, int32_t)),
               this, SLOT(on_position_change(int32_t, int32_t, int32_t)));
+    QObject::connect(handler.get(), SIGNAL(errorTask(const QString &)),
+              this, SLOT(on_errorTask(const QString &)));
     ui->setupUi(this);
 }
 
@@ -25,9 +27,16 @@ void MainWindow::on_position_change(int32_t x, int32_t y, int32_t angle)
 
 }
 
+void MainWindow::on_errorTask(const QString &err)
+{
+    QMessageBox errBox;
+    errBox.setText(err);
+    errBox.exec();
+}
+
 void MainWindow::on_connectButton_clicked()
 {
-    conn->connect();
+    handler->connectToMCU();
 }
 
 
@@ -65,4 +74,9 @@ void MainWindow::on_angleSlide_valueChanged(int value)
         handler->handleMove(MoveAngleLeft, ui->axisPosition->value() - value);
     }
 
+}
+
+void MainWindow::on_goToButton_clicked()
+{
+    handler->handleGoToPosition();
 }

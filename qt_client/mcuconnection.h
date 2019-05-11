@@ -2,6 +2,8 @@
 #define MCUCONNECTION_H
 
 #include <QObject>
+#include "qextserialport.h"
+
 
 class MCUConnection : public QObject
 {
@@ -9,7 +11,9 @@ class MCUConnection : public QObject
 public:
     explicit MCUConnection(QObject *parent = nullptr);
     void connect();
-    void  sendCmd();
+    void  sendCmd(const QString &cmd);
+private:
+    QextSerialPort *port;
 
 signals:
 

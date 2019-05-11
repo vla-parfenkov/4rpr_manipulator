@@ -2,6 +2,8 @@
 #define GUITASK_H
 
 #include <QObject>
+#include <memory>
+#include "mcuconnection.h"
 
 namespace GUITaskConstant
 {
@@ -24,9 +26,12 @@ class GUITask : public QObject
 public:
     explicit GUITask(QObject *parent = nullptr);
     void handleMove(MoveDirection direction, uint32_t speed);
+    void connectToMCU();
+    void handleGoToPosition();
 
 signals:
     void changePosition(int32_t x, int32_t y, int32_t angle);
+    void errorTask(const QString &err);
 
 public slots:
 
@@ -34,6 +39,7 @@ private:
     int32_t currentX;
     int32_t currentY;
     int32_t currentAngle;
+    std::unique_ptr<MCUConnection> conn;
 
 
 };

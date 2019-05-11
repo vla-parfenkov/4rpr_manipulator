@@ -20,6 +20,7 @@ public:
 
 public slots:
     void on_position_change(int32_t x, int32_t y, int32_t angle);
+    void on_errorTask(const QString &err);
 
 private slots:
     void on_connectButton_clicked();
@@ -34,10 +35,11 @@ private slots:
 
     void on_angleSlide_valueChanged(int value);
 
+    void on_goToButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     std::unique_ptr<GUITask> handler;
-    std::unique_ptr<MCUConnection> conn;
     uint32_t speedAngleSlider;
 };
 
