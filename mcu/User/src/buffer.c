@@ -5,19 +5,12 @@
 
 void initBuffer(struct Buffer *buf)
 {
-	buf = (struct Buffer*)malloc(sizeof(struct Buffer));
 	if(buf == NULL)
 		return;
 	buf->head = 0;
 	buf->tail = 0;
 	buf->sizebuff = 1024; 
 	buf->data[0] = 0;
-}
-
-void deinitBuffer(struct Buffer *buf)
-{
-	if(buf)
-		free(buf);
 }
 
 int sizeBuffer(struct Buffer *buf)
@@ -30,7 +23,7 @@ int sizeBuffer(struct Buffer *buf)
     return (buf->tail - buf->head);
 }
 
-void pushBuffer(uint8_t bait, struct Buffer *buf)
+void pushBuffer(char bait, struct Buffer *buf)
 {
 	if(!buf)
 		return;
@@ -49,9 +42,9 @@ bool isEmptyBuffer(struct Buffer *buf)
 	return (buf->head == buf->tail);
 }
 
-uint8_t popBuffer(struct Buffer *buf, bool errorFlag)
+char popBuffer(struct Buffer *buf, bool errorFlag)
 {
-	uint8_t res = 0;
+	char res = 0;
 	if (isEmptyBuffer(buf))
 	{		
 		errorFlag = true;
@@ -63,9 +56,9 @@ uint8_t popBuffer(struct Buffer *buf, bool errorFlag)
   return res;
 }
 
-uint8_t showBuffer(struct Buffer *buf, bool empty)
+char showBuffer(struct Buffer *buf, bool empty)
 {
-	uint8_t res = 0;
+	char res = 0;
 	if (isEmptyBuffer(buf))
 	{		
 		empty = true;
@@ -76,10 +69,9 @@ uint8_t showBuffer(struct Buffer *buf, bool empty)
   return res;
 }
 
-void readDataFromBuffer(struct Buffer *buf, uint8_t *data)
+void readDataFromBuffer(struct Buffer *buf, char **data)
 {
-	uint8_t *p = buf->data;
-	data = NULL;
+	char *p = buf->data;
 	if(!buf)
 		return;
 	
@@ -88,19 +80,21 @@ void readDataFromBuffer(struct Buffer *buf, uint8_t *data)
 	
 	if (buf->head > buf->tail)
 	{
-		data = (uint8_t*)malloc(sizeof(uint8_t) * (buf->sizebuff - buf->head + buf->tail));
-    if(data == NULL)
+		*data = (char *)malloc(sizeof(char) * (buf->sizebuff - buf->head + buf->tail));
+    if(*data == NULL)
 			return;
-		memcpy(data, (p + buf->head), (buf->sizebuff - buf->head));
-		memcpy((data + buf->sizebuff - buf->head), p, buf->tail);
+		memcpy(*data, (p + buf->head), (buf->sizebuff - buf->head));
+		memcpy((*data + buf->sizebuff - buf->head), p, buf->tail);
 		buf->head = 0;
 		buf->tail = 0;
 	}
   else
 	{
-		data = (uint8_t*)malloc(sizeof(uint8_t) * (buf->tail - buf->head));
-		if(data == NULL)
+		*data = (char*)malloc(sizeof(char) * (buf->tail - buf->head));
+		if(*data == NULL)
 			return;
-		memcpy(data, (p + buf->head), (buf->tail - buf->head));
+		memcpy(*data, (p + buf->head), (buf->tail - buf->head));
+		buf->head = 0;
+		buf->tail = 0;
 	}
 }

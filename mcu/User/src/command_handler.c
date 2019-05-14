@@ -235,6 +235,5 @@ void usartCmdHandler(char *cmd)
 		setMcuState(DoCMD);
 		timer_mcsXhun(START_T);
 		USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
-		deinitBuffer(getUsartBuffer());
 	}
 }

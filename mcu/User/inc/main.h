@@ -43,7 +43,5 @@ void setMcuState(enum MCUState state);
 
 uint32_t getDoCmdTim();
 
-struct Buffer *getUsartBuffer();
-
 #endif 
 

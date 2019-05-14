@@ -6,20 +6,14 @@
 uint32_t size = 0;
 struct QueueCommand *head = NULL;
 struct QueueCommand *tail = NULL;
-struct QueueCommand *initCmd(char *cmd, struct QueueCommand *next)
-{
-	struct QueueCommand *newCmd = (struct QueueCommand*)malloc(sizeof(struct QueueCommand));
-	if(!newCmd)
-		return NULL;
-	
-	newCmd->cmd = cmd;
-	newCmd->next = next;
-}
+
 
 void pushQueueCmd(char *cmd)
 {
 	struct QueueCommand *newCmd = tail;
-  tail = initCmd(cmd, NULL);
+  tail = (struct QueueCommand*)malloc(sizeof(struct QueueCommand));
+	tail->cmd = cmd;
+	tail->next = NULL;
   if (size == 0)
     head = tail;
   else 
@@ -31,10 +25,10 @@ char *popQueueCmd(void)
 {
 	struct QueueCommand *cmd;
 	char *res;
-	size--;
   cmd = head;
 	if(!cmd)
 		return NULL;
+	size--;
   head = head->next;
 	res = cmd->cmd;
 	free(cmd);

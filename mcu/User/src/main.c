@@ -12,7 +12,7 @@ uint8_t SystikCount = 0;
 
 enum MCUState mcuState = WaitCMD;
 uint32_t doCmdTim = 0;
-struct Buffer *g_buf = 0;
+struct Buffer g_buf;
 
 
 //---------------------
@@ -45,16 +45,20 @@ void SysTick_Handler(void)
 void USART2_IRQHandler()
 {
 	char data;
-	char *cmd;
+	char *cmd = NULL;
 	if(USART_GetITStatus(USART2, USART_IT_RXNE) == SET)
 	{
 		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 		data = (char)USART_ReceiveData(USART2);
-		pushBuffer((uint8_t)data, g_buf);
 		if( data == '\n')
 		{
-			readDataFromBuffer(g_buf, (uint8_t *)cmd);
+			pushBuffer('\0', &g_buf);
+			readDataFromBuffer(&g_buf, &cmd);
 			pushQueueCmd(cmd);
+		} 
+		else
+		{
+			pushBuffer(data, &g_buf);
 		}
 	}
 }
@@ -77,7 +81,7 @@ int main(void)
 	char *cmd = NULL;
 	
 	uint8_t flagTest = 0;
-	initBuffer(g_buf);
+	initBuffer(&g_buf);
 
 	SystemCoreClockUpdate(); //посчитать SystemCoreClock
 	SysTick_Config(SystemCoreClock/10000);//генерация каждую десятую миллисекунду
@@ -114,6 +118,7 @@ int main(void)
 	//timer_mcsXhun(START_T);
 	//startTimer(TIM3);
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+	GPIO_SetBits(GPIOD, GPIO_Pin_13);
 	while( 1 )
 	{
 		switch(mcuState)
@@ -134,7 +139,7 @@ int main(void)
 				if(doCmdTim >= 300000)
 				{
 					mcuState = WaitCMD;
-					initBuffer(g_buf);
+					initBuffer(&g_buf);
 					USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 				}
 				break;
@@ -143,8 +148,6 @@ int main(void)
 				break;
 		}
 	}
-	
-	deinitBuffer(g_buf);
 	
 }
 
@@ -172,8 +175,4 @@ uint32_t getDoCmdTim()
 	return doCmdTim;
 }
 
-struct Buffer *getUsartBuffer()
-{
-	return g_buf;
-}
 
