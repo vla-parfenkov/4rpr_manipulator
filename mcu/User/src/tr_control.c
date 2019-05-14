@@ -5,6 +5,7 @@
 #include "string.h"
 
 struct TrState* trStates;
+enum TrControlState state = WAITSTART;
 uint16_t trStatesSize = 0;
 uint16_t trStatesCount = 0;
 float a1 = 0.36 / 2; 
@@ -21,12 +22,11 @@ float by3 = 0;
 float by4 = 0;
 
 
-void initTr(struct TrState* trStates)
+void initTr(struct TrState *tS, uint16_t size)
 {
-	struct Tr* tr = (struct Tr*)malloc(sizeof(struct Tr));
-	struct SpeedTr* trSpeed = (struct SpeedTr*)malloc(sizeof(struct SpeedTr));
-
-	//init sizeTr;
+	trStates = tS;
+	trStatesSize = size;
+	state = STARTED;
 }
 
 void deinitTr(struct TrState* trStates)
@@ -79,10 +79,13 @@ struct MechState* getMechStateByTime(uint16_t time)
 		}
 	}
 	
-	Kcount = trStatesSize - 2;
+	Kcount = trStatesSize - 1;
 	
-	if ( trStatesCount >= trStatesSize)
+	if ( trStatesCount >= trStatesSize - 1)
+	{
 		trStatesCount =  trStatesSize - 1;
+		state = STOPED;
+	}
 	
 	
 	sTr =  *(trStates->tr + trStatesCount);
@@ -109,6 +112,7 @@ struct MechState* getMechStateByTime(uint16_t time)
 	speed = getSpeedGenCoordinateByTr(nTr, *sgc, sspTr);
 	
 	memcpy(&res->speed, speed , sizeof(struct SpeedGenCoordinate));
+	res->state = state;
 
 	if (speed)
 		free(speed);
@@ -154,3 +158,4 @@ struct SpeedGenCoordinate* getSpeedGenCoordinateByTr(struct  Tr tr,
 		
 		return sgc;
 	}
+	

@@ -16,42 +16,54 @@ void GUITask::handleMove(MoveDirection direction, uint32_t speed)
         case MoveUp:
         {
             int32_t newXpossition = currentX + static_cast<int32_t>(speed * GUITaskConstant::diskret);
-            conn->sendCmd("TestUsartSetLCD");
+            QString cmd = "[" + QString(newXpossition) + ",0,0,"
+                    + QString(speed) + ",0,0," + QString(GUITaskConstant::diskret) + "]";
+            conn->sendCmd(cmd);
             currentX = newXpossition;
             break;
         }
     case MoveDown:
     {
         int32_t newXpossition = currentX - static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        conn->sendCmd("TestUsartResetLCD");
+        QString cmd = "[" + QString(newXpossition) + ",0,0,"
+                + QString(speed) + ",0,0," + QString(GUITaskConstant::diskret) + "]";
+        conn->sendCmd(cmd);
         currentX = newXpossition;
         break;
     }
     case MoveLeft:
     {
         int32_t newYpossition = currentY - static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        //sendCmd
+        QString cmd = "[0," + QString(newYpossition) + ",0,0,"
+                + QString(speed) + ",0," + QString(GUITaskConstant::diskret) + "]";
+        conn->sendCmd(cmd);
         currentY = newYpossition;
         break;
     }
     case MoveRight:
     {
         int32_t newYpossition = currentY + static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        //sendCmd
+        QString cmd = "[0," + QString(newYpossition) + ",0,0,"
+                + QString(speed) + ",0," + QString(GUITaskConstant::diskret) + "]";
+        conn->sendCmd(cmd);
         currentY = newYpossition;
         break;
     }
     case MoveAngleRight:
     {
         int32_t newAnglePosition = currentAngle + static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        //sendCmd
+        QString cmd = "[0,0," + QString(newAnglePosition) + ",0,0,"
+                + QString(speed) + "," + QString(GUITaskConstant::diskret) + "]";
+        conn->sendCmd(cmd);
         currentAngle = newAnglePosition;
         break;
     }
     case MoveAngleLeft:
     {
         int32_t newAnglePosition = currentAngle - static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        //sendCmd
+        QString cmd = "[0,0," + QString(newAnglePosition) + ",0,0,"
+                + QString(speed) + "," + QString(GUITaskConstant::diskret) + "]";
+        conn->sendCmd(cmd);
         currentAngle = newAnglePosition;
         break;
     }

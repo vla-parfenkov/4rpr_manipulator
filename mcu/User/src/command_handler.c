@@ -1,5 +1,8 @@
 #include "command_handler.h"
 #include <string.h>
+#include "tr_control.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 
 #define MAX_P2 650
@@ -224,6 +227,11 @@ uint16_t getTimer(TIM_TypeDef* TIMx)
 
 void usartCmdHandler(char *cmd)
 {
+	int res = 0;
+	struct Tr *tr;
+	struct TrState *tS;
+	uint16_t *tend;
+	struct SpeedTr *str;
 	if(strcmp(cmd, "TestUsartSetLCD") == 0)
 	{
 		GPIO_SetBits(GPIOD, GPIO_Pin_12);
@@ -235,5 +243,44 @@ void usartCmdHandler(char *cmd)
 		setMcuState(DoCMD);
 		timer_mcsXhun(START_T);
 		USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+	} 
+	else
+	{
+		if(cmd[0] == '[')
+		{
+			int16_t x,y,thetta,sx,sy,sthetta,t;
+			
+			res = sscanf(cmd, "[%hi,%hi,%hi,%hi,%hi,%hi,%hi]", &x, &y, &thetta, &sx, &sy, &sthetta,&t);
+			if(res < 7)
+				return;
+			tS = (struct TrState*)malloc(sizeof(struct TrState) * 2);
+			tS->tr = (struct Tr*)malloc(sizeof(struct Tr) * 2);
+			tS->speedTr = (struct SpeedTr*)malloc(sizeof(struct SpeedTr) * 2);
+			tS->t = (uint16_t*)malloc(sizeof(uint16_t) * 2);
+			
+			tS->tr->x = 0;
+			tS->tr->y = 0;
+			tS->tr->thetta = 0;
+			tS->speedTr->x = sx;
+			tS->speedTr->y = sy;
+			tS->speedTr->thetta = sthetta;
+			*tS->t = 0;
+			
+			tr = (tS->tr + 1);
+			tend = (tS->t + 1);
+			str = (tS->speedTr + 1);
+			tr->x = x;
+			tr->y = y;
+			tr->thetta = thetta;
+			str->x = 0;
+			str->y = 0;
+			str->thetta = 0;
+			*tend = t; 
+			initTr(tS, 2);
+			setMcuState(DoCMD);
+			timer_mcsXhun(START_T);
+			USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+		}
 	}
+	
 }

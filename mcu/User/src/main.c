@@ -136,7 +136,9 @@ int main(void)
 			case DoCMD:
 			{
 				doCmdTim = timer_mcsXhun(SEE_T);
-				if(doCmdTim >= 300000)
+				currentState = getMechStateByTime(doCmdTim);
+				motorControl(currentState->speed);
+				if(currentState->state == STOPED)
 				{
 					mcuState = WaitCMD;
 					initBuffer(&g_buf);
