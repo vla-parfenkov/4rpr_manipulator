@@ -7,7 +7,7 @@
 
 namespace GUITaskConstant
 {
-  static const uint32_t diskret = 1;
+  static const uint32_t diskret = 2;
 }
 
 enum MoveDirection

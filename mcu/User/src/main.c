@@ -8,7 +8,7 @@ uint8_t flag_zero = 0; //флаг операции установки нуля
 uint8_t flag = 0;
 uint32_t time_count = 0;
 uint8_t SystikCount = 0;
-
+bool stop = false;
 
 enum MCUState mcuState = WaitCMD;
 uint32_t doCmdTim = 0;
@@ -39,6 +39,11 @@ void SysTick_Handler(void)
 		} else {
 				button_flag=0;
 			}	
+	}
+	if (button_flag == 1)
+	{
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+		stop = true;
 	}
 }
 
@@ -78,9 +83,19 @@ void delay_mcsXhun(uint32_t delay_temp)
 int main(void)
 {
 	struct MechState* currentState = 0;
+	struct MechState* lastState = 0;
+	struct SpeedGenCoordinate zeroSpeed;
 	char *cmd = NULL;
-	
+	uint16_t timeMS;
+	int i = 0;
 	uint8_t flagTest = 0;
+	
+	
+	zeroSpeed.d1 = 0;
+	zeroSpeed.d2 = 0;
+	zeroSpeed.d3 = 0;
+	zeroSpeed.d4 = 0;
+
 	initBuffer(&g_buf);
 
 	SystemCoreClockUpdate(); //посчитать SystemCoreClock
@@ -102,29 +117,41 @@ int main(void)
 	//------------------------------------
 	GPIO_ini ( GPIOD, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4|GPIO_Pin_12|GPIO_Pin_13, OUT); //порт D на выход 
 	GPIO_ini ( GPIOC, GPIO_Pin_6|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5, IN); //порт C на вход
-	GPIO_ini ( GPIOB, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4,AF);//порт B на AF режим
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource6 , GPIO_AF_TIM4); //настройка AF режима
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource7 , GPIO_AF_TIM4); //настройка AF режима
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource8 , GPIO_AF_TIM4); //настройка AF режима
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource9 , GPIO_AF_TIM4); //настройка AF режима
+	GPIO_ini ( GPIOB, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4,OUT);//порт B на AF режим
+	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource6 , GPIO_AF_TIM4); //настройка AF режима
+	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource7 , GPIO_AF_TIM4); //настройка AF режима
+	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource8 , GPIO_AF_TIM4); //настройка AF режима
+	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource9 , GPIO_AF_TIM4); //настройка AF режима
 	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource10 , GPIO_AF_TIM2); //настройка AF режима
 	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource11 , GPIO_AF_TIM2); //настройка AF режима
 	GPIO_ini ( GPIOE, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4,OUT); //порт E на выход
 	usartIni();
 	
-	TIM_Cmd(TIM4, ENABLE);
+	//TIM_Cmd(TIM4, ENABLE);
 	//TIM_Cmd(TIM2, ENABLE);
-	
+	//TIM_Cmd(TIM3, ENABLE);
+	GPIO_SetBits(GPIOE, GPIO_Pin_6);
 	//timer_mcsXhun(START_T);
 	//startTimer(TIM3);
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 	GPIO_SetBits(GPIOD, GPIO_Pin_13);
-	while( 1 )
+	GPIO_SetBits(GPIOE, GPIO_Pin_6);
+	for (i=0; i < 500; i++)
+	{
+		GPIO_SetBits(GPIOB, GPIO_Pin_6);
+		delay_mcsXhun(1);
+		GPIO_ResetBits(GPIOB, GPIO_Pin_6);
+		delay_mcsXhun(1);
+		delay_mcsXhun(10);
+	}
+	while( !stop )
 	{
 		switch(mcuState)
 		{
 			case WaitCMD:
 			{
+				GPIO_ResetBits(GPIOE, GPIO_Pin_6);
+				GPIO_ResetBits(GPIOD, GPIO_Pin_12);
 				cmd = popQueueCmd();
 				if(cmd)
 				{
@@ -136,14 +163,40 @@ int main(void)
 			case DoCMD:
 			{
 				doCmdTim = timer_mcsXhun(SEE_T);
-				currentState = getMechStateByTime(doCmdTim);
-				motorControl(currentState->speed);
-				if(currentState->state == STOPED)
+				timeMS = doCmdTim / 10;
+				if(timeMS == 1000)
+					(void)timeMS;
+				currentState = getMechStateByTime(timeMS);
+				if(lastState)
+					motorControl(currentState->speed, lastState->speed);
+				else
+					motorControl(currentState->speed, zeroSpeed);
+				if(!currentState || currentState->state == STOPED)
 				{
 					mcuState = WaitCMD;
 					initBuffer(&g_buf);
+					StartMotor(AXIS_Q1, FORWARD, 0);
+					if(currentState)
+						free(currentState);
+					if(lastState)
+						free(lastState);
+					currentState = NULL;
+					lastState = NULL;
+					deinitTr();
 					USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+				} else 
+				{
+					if(lastState)
+						free(lastState);
+					lastState = currentState;
 				}
+				/*if(doCmdTim >= 100000)
+				{
+					mcuState = WaitCMD;
+					StartMotor (AXIS_Q1, FORWARD, 0.0);
+					initBuffer(&g_buf);
+					USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+				}*/
 				break;
 			}
 			default:

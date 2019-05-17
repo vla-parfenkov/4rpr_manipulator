@@ -43,7 +43,7 @@ void StartMotor (uint16_t MotorPin, uint8_t Direction, double Speed)
 	//Push (PWM_COMMAND, 0, TypeTim , MotorPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * CalcTAKT (Speed, MotorPin)), 0);
 	//Push (RESETBITS_COMMAND, 0, 0, MotorPin, 0, 0, 0, GPIOE);
 	PWM (TypeTim, MotorPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * CalcTAKT (Speed, MotorPin)));
-	GPIO_ResetBits(GPIOE,MotorPin);
+	GPIO_SetBits(GPIOE,MotorPin);
 
 }
 
@@ -55,7 +55,8 @@ void StopMotor (uint16_t MotorPin, double Speed)
 {
 
 	//Push (SETBITS_COMMAND, 0, 0, MotorPin, 0, 0, 0, GPIOE);
-	GPIO_SetBits(GPIOE,MotorPin);
+	//GPIO_SetBits(GPIOE,MotorPin);
+	StartMotor (MotorPin, FORWARD, 0);
 }
 
 
@@ -87,11 +88,11 @@ void StopMotor (uint16_t MotorPin, double Speed)
 		for ( i = 1; i < 7; ++i) {
 			CurrentPin = (TestBit >> i) & MotorPin;
 			if (CurrentPin != 0){
-				if ( CurrentPin == AXIS_Z1 || CurrentPin == AXIS_Z2){
-					TypeTim = TIM2;
-				} else {
+				//if ( CurrentPin == AXIS_Z1 || CurrentPin == AXIS_Z2){
+					//TypeTim = TIM2;
+				//} else {
 					TypeTim = TIM4;
-				}
+				//}
 				//Push (PWM_COMMAND, 0, TypeTim , CurrentPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * CountFrequency), 0);
 				//Push (DELAY_COMMAND, Time, 0, 0, 0, 0, 0, 0);
 				//deltaPosition [6 - i] = deltaPosition [6 - i] + CalcSpeed( CountFrequency, CurrentPin) / (double)Time;
@@ -132,10 +133,10 @@ uint16_t CalcTAKT (double Speed, uint16_t MotorPin)
 	double Freq = 0;
 	
 	if(MotorPin == AXIS_Q1 || MotorPin == AXIS_Q2){
-		Mech = 56.5; // мм на оборот
+		Mech = 5; // мм на оборот
 	}
 	if(MotorPin == AXIS_Q3 || MotorPin == AXIS_Q4){
-		Mech = 56.5; // мм на оборот
+		Mech = 5; // мм на оборот
 	}
 	
 
@@ -201,51 +202,40 @@ uint16_t CalcTAKT (double Speed, uint16_t MotorPin)
 	
 }*/
 
-void motorControl(struct SpeedGenCoordinate speed)
+void motorControlImpl(int16_t speed, int16_t lastSpeed, uint16_t MotorPin)
 {
-	if(speed.d1 == 0) 
+	if(speed == lastSpeed)
+		return;
+		
+	if(speed == 0) 
 	{
-		StopMotor(AXIS_Q1, speed.d1);
-	} else if (speed.d1 > 0)
+		StopMotor(MotorPin, speed);
+	} 
+	else if (speed > 0)
 	{
-		StartMotor (AXIS_Q1, FORWARD, speed.d1);
+		StartMotor (MotorPin, FORWARD, speed);
 	} else 
 	{
-		StartMotor (AXIS_Q1, REVERSE, speed.d1);
+		StartMotor (MotorPin, REVERSE, speed);
+	}
+}
+
+void motorControl(struct SpeedGenCoordinate speed, struct SpeedGenCoordinate lastSpeed)
+{
+	if(speed.d1 > 100 && speed.d2 > 100 && speed.d3 > 100 && speed.d4 > 100)
+	{
+		StopMotor(AXIS_Q1, 0);
+		StopMotor(AXIS_Q2, 0);
+		StopMotor(AXIS_Q3, 0);
+		StopMotor(AXIS_Q4, 0);
+		return;
 	}
 	
-	if(speed.d2 == 0) 
-	{
-		StopMotor(AXIS_Q2, speed.d2);
-	} else if (speed.d2 > 0)
-	{
-		StartMotor (AXIS_Q2, FORWARD, speed.d2);
-	} else 
-	{
-		StartMotor (AXIS_Q2, REVERSE, speed.d2);
-	}
+	motorControlImpl(speed.d1, lastSpeed.d1, AXIS_Q1);
+	motorControlImpl(speed.d2, lastSpeed.d2, AXIS_Q2);
+	motorControlImpl(speed.d3, lastSpeed.d3, AXIS_Q3);
+	motorControlImpl(speed.d4, lastSpeed.d4, AXIS_Q4);
 	
-	if(speed.d3 == 0) 
-	{
-		StopMotor(AXIS_Q3, speed.d1);
-	} else if (speed.d3 > 0)
-	{
-		StartMotor (AXIS_Q3, FORWARD, speed.d3);
-	} else 
-	{
-		StartMotor (AXIS_Q3, REVERSE, speed.d3);
-	}
-	
-	if(speed.d4 == 0) 
-	{
-		StopMotor(AXIS_Q4, speed.d4);
-	} else if (speed.d4 > 0)
-	{
-		StartMotor (AXIS_Q4, FORWARD, speed.d4);
-	} else 
-	{
-		StartMotor (AXIS_Q4, REVERSE, speed.d4);
-	}
 	
 }
 

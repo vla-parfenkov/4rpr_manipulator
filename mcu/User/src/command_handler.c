@@ -242,6 +242,7 @@ void usartCmdHandler(char *cmd)
 	{
 		setMcuState(DoCMD);
 		timer_mcsXhun(START_T);
+		StartMotor (AXIS_Q1, REVERSE, 2);
 		USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
 	} 
 	else

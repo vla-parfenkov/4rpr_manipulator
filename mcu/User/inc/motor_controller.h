@@ -14,7 +14,7 @@
 #define ACCELERATION 4 // об/сек*сек 
 #define DECELERATION 0.8  // об/сек*сек
 #define START_FREQ  400 // такт/сек
-#define TAKT_CONF 1600 // настройки на драйвере
+#define TAKT_CONF 800 // настройки на драйвере
 #define TIM_PERIOD 100 // период срабатывания таймера
 #define TIM_PULSE 50 // ШИМ сброс
 #define TIM_TAKT 84000000 //тактирование таймера
@@ -26,7 +26,7 @@ void StartMotor (uint16_t MotorPin, uint8_t Direction, double Speed);
 //остановить двигатель
 void StopMotor (uint16_t MotorPin, double Speed);
 
-void motorControl(struct SpeedGenCoordinate speed);
+void motorControl(struct SpeedGenCoordinate speed, struct SpeedGenCoordinate lastSpeed);
 	
 //Определить настройки таймера:
 uint16_t CalcTAKT (double Speed, uint16_t MotorPin);

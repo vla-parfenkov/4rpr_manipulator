@@ -16,8 +16,8 @@ void GUITask::handleMove(MoveDirection direction, uint32_t speed)
         case MoveUp:
         {
             int32_t newXpossition = currentX + static_cast<int32_t>(speed * GUITaskConstant::diskret);
-            QString cmd = "[" + QString(newXpossition) + ",0,0,"
-                    + QString(speed) + ",0,0," + QString(GUITaskConstant::diskret) + "]";
+            QString cmd = "[" + QString::number(newXpossition) + ",0,0,"
+                    + QString::number(speed) + ",0,0," + QString::number(GUITaskConstant::diskret * 1000) + "]";
             conn->sendCmd(cmd);
             currentX = newXpossition;
             break;
@@ -25,8 +25,8 @@ void GUITask::handleMove(MoveDirection direction, uint32_t speed)
     case MoveDown:
     {
         int32_t newXpossition = currentX - static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        QString cmd = "[" + QString(newXpossition) + ",0,0,"
-                + QString(speed) + ",0,0," + QString(GUITaskConstant::diskret) + "]";
+        QString cmd = "[" + QString::number(newXpossition) + ",0,0,"
+                + QString::number(speed) + ",0,0," + QString::number(GUITaskConstant::diskret * 1000) + "]";
         conn->sendCmd(cmd);
         currentX = newXpossition;
         break;

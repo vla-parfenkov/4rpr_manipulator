@@ -16,7 +16,7 @@ void GPIO_ini (GPIO_TypeDef* GPIOPORT, uint16_t Pin,uint8_t GMode)
 	GPIO_INITPORT.GPIO_Pin = Pin; //включение выходов
 	GPIO_INITPORT.GPIO_Mode = GPIO_Mode_OUT; //настройка на AF режим ножки 
 	GPIO_INITPORT.GPIO_Speed = GPIO_Speed_2MHz; //скорость 
-	GPIO_INITPORT.GPIO_OType = GPIO_OType_PP; //подтягивание земли к питанию
+	GPIO_INITPORT.GPIO_OType = GPIO_OType_OD; //подтягивание земли к питанию
 	GPIO_INITPORT.GPIO_PuPd = GPIO_PuPd_NOPULL; 
   }
 	if(GMode == IN)
@@ -32,14 +32,14 @@ void GPIO_ini (GPIO_TypeDef* GPIOPORT, uint16_t Pin,uint8_t GMode)
 		GPIO_INITPORT.GPIO_Pin = Pin; //включение выходов
 	GPIO_INITPORT.GPIO_Mode = GPIO_Mode_AF; //настройка на AF режим ножки 
 	GPIO_INITPORT.GPIO_Speed = GPIO_Speed_100MHz; //скорость 
-	GPIO_INITPORT.GPIO_OType = GPIO_OType_PP; //подтягивание земли к питанию
+	GPIO_INITPORT.GPIO_OType = GPIO_OType_OD; //подтягивание земли к питанию
 	GPIO_INITPORT.GPIO_PuPd = GPIO_PuPd_NOPULL; 
 	}
 	if(GMode == AN ){	
 	GPIO_INITPORT.GPIO_Pin = Pin; //включение выходов
 	GPIO_INITPORT.GPIO_Mode = GPIO_Mode_AN; //настройка на аналоговый режим ножки 
 	GPIO_INITPORT.GPIO_Speed = GPIO_Speed_2MHz; //скорость 
-	GPIO_INITPORT.GPIO_OType = GPIO_OType_PP; //подтягивание земли к питанию
+	GPIO_INITPORT.GPIO_OType = GPIO_OType_OD; //подтягивание земли к питанию
 	GPIO_INITPORT.GPIO_PuPd = GPIO_PuPd_NOPULL; 
 	}
 	

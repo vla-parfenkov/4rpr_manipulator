@@ -55,6 +55,7 @@ struct TrState
 
 
 void initTr(struct TrState* tS, uint16_t size);
+void deinitTr();
 
 struct MechState* getMechStateByTime(uint16_t time);
 

@@ -29,15 +29,22 @@ void initTr(struct TrState *tS, uint16_t size)
 	state = STARTED;
 }
 
-void deinitTr(struct TrState* trStates)
+void deinitTr()
 {
 	if(!trStates)
 		return;
-	if(!trStates->tr)
+	if(trStates->tr)
 		free(trStates->tr);
 	
-	if(!trStates->speedTr)
+	if(trStates->speedTr)
 		free(trStates->speedTr);
+	
+	if(trStates->t)
+		free(trStates->t);
+	
+	state = WAITSTART;
+	trStatesSize = 0;
+	trStatesCount = 0;
 	
 	free(trStates);
 }
@@ -46,7 +53,6 @@ void deinitTr(struct TrState* trStates)
 struct MechState* getMechStateByTime(uint16_t time)
 {
 	uint16_t i;
-	uint16_t Kcount;
 	uint16_t temp;
 	struct Tr nTr;
 	struct SpeedTr nspTr;
@@ -55,6 +61,10 @@ struct MechState* getMechStateByTime(uint16_t time)
 	struct Tr sTr;
 	struct SpeedTr sspTr;
 	struct SpeedGenCoordinate* speed;
+	
+	
+	if(state != STARTED)
+		return NULL;
 	
 	if(!trStates)
 		return NULL;
@@ -69,31 +79,26 @@ struct MechState* getMechStateByTime(uint16_t time)
 		return NULL;
 	
 	
-	for (i = trStatesCount; i < trStatesSize - 1; i++)
-	{
+	for (i = trStatesCount; i < trStatesSize; i++)
+  {
+		trStatesCount = i;
 		temp = *(trStates->t + i);
-		if (temp >= time && time < *(trStates->t + i + 1))
+		if (time >= temp && time < *(trStates->t + i + 1))
 		{
-				Kcount = trStatesCount;
-			break;
+      break;
 		}
 	}
-	
-	Kcount = trStatesSize - 1;
-	
+
 	if ( trStatesCount >= trStatesSize - 1)
-	{
-		trStatesCount =  trStatesSize - 1;
 		state = STOPED;
-	}
 	
 	
 	sTr =  *(trStates->tr + trStatesCount);
-	sspTr =  *(trStates->speedTr + Kcount);
+	sspTr =  *(trStates->speedTr + trStatesCount);
 
-	nTr.thetta = sTr.thetta + sspTr.thetta * (time - temp); 
-	nTr.x = sTr.x + sspTr.x * (time - temp);
-	nTr.y = sTr.y + sspTr.y * (time - temp);
+	nTr.thetta = sTr.thetta + sspTr.thetta * (time - temp) * 0.001; 
+	nTr.x = sTr.x + sspTr.x * (time - temp) * 0.001;
+	nTr.y = sTr.y + sspTr.y * (time - temp) * 0.001;
 	
 	sgc = getSecondGenCoordinateByTr(nTr);
 	
@@ -150,10 +155,10 @@ struct SpeedGenCoordinate* getSpeedGenCoordinateByTr(struct  Tr tr,
 		if (!sgc)
 			return NULL;
 		
-		sgc->a1 = 1 / atan ((tr.y - by1 + a1*sin(tr.thetta)) / (tr.x - bx1 + a1*cos(tr.thetta)));
-		sgc->a2 = 1 / atan ((tr.y - by2 + a2*sin(tr.thetta)) / (tr.x - bx2 + a2*cos(tr.thetta)));
-		sgc->a3 = 1 / atan ((tr.y - by3 + a3*sin(tr.thetta)) / (tr.x - bx3 + a3*cos(tr.thetta)));
-		sgc->a4 = 1 / atan ((tr.y - by4 + a4*sin(tr.thetta)) / (tr.x - bx4 + a4*cos(tr.thetta)));
+		sgc->a1 = atan ((tr.y - by1 + a1*sin(tr.thetta)) / (tr.x - bx1 + a1*cos(tr.thetta)));
+		sgc->a2 = atan ((tr.y - by2 + a2*sin(tr.thetta)) / (tr.x - bx2 + a2*cos(tr.thetta)));
+		sgc->a3 = atan ((tr.y - by3 + a3*sin(tr.thetta)) / (tr.x - bx3 + a3*cos(tr.thetta)));
+		sgc->a4 = atan ((tr.y - by4 + a4*sin(tr.thetta)) / (tr.x - bx4 + a4*cos(tr.thetta)));
 		
 		
 		return sgc;
