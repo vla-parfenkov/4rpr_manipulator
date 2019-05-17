@@ -8,7 +8,10 @@ uint8_t flag_zero = 0; //флаг операции установки нуля
 uint8_t flag = 0;
 uint32_t time_count = 0;
 uint8_t SystikCount = 0;
+uint16_t countImpl = 3200;
+uint16_t flag_counter = 4; 
 bool stop = false;
+uint16_t maxPeriodSpeed = 50;
 
 enum MCUState mcuState = WaitCMD;
 uint32_t doCmdTim = 0;
@@ -89,7 +92,8 @@ int main(void)
 	uint16_t timeMS;
 	int i = 0;
 	uint8_t flagTest = 0;
-	
+	uint16_t timPrescaler = (uint16_t)TIM_TAKT / 1000 - 1;
+	uint16_t timPeriod = 10;
 	
 	zeroSpeed.d1 = 0;
 	zeroSpeed.d2 = 0;
@@ -118,39 +122,27 @@ int main(void)
 	GPIO_ini ( GPIOD, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4|GPIO_Pin_12|GPIO_Pin_13, OUT); //порт D на выход 
 	GPIO_ini ( GPIOC, GPIO_Pin_6|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5, IN); //порт C на вход
 	GPIO_ini ( GPIOB, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4,OUT);//порт B на AF режим
-	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource6 , GPIO_AF_TIM4); //настройка AF режима
-	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource7 , GPIO_AF_TIM4); //настройка AF режима
-	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource8 , GPIO_AF_TIM4); //настройка AF режима
-	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource9 , GPIO_AF_TIM4); //настройка AF режима
-	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource10 , GPIO_AF_TIM2); //настройка AF режима
-	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource11 , GPIO_AF_TIM2); //настройка AF режима
 	GPIO_ini ( GPIOE, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4,OUT); //порт E на выход
 	usartIni();
 	
-	//TIM_Cmd(TIM4, ENABLE);
-	//TIM_Cmd(TIM2, ENABLE);
+	
+	
 	//TIM_Cmd(TIM3, ENABLE);
 	GPIO_SetBits(GPIOE, GPIO_Pin_6);
 	//timer_mcsXhun(START_T);
-	//startTimer(TIM3);
+	startTimer(TIM3, timPeriod, timPrescaler);
+	NVIC_EnableIRQ(TIM3_IRQn);
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 	GPIO_SetBits(GPIOD, GPIO_Pin_13);
 	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-	for (i=0; i < 500; i++)
-	{
-		GPIO_SetBits(GPIOB, GPIO_Pin_6);
-		delay_mcsXhun(1);
-		GPIO_ResetBits(GPIOB, GPIO_Pin_6);
-		delay_mcsXhun(1);
-		delay_mcsXhun(10);
-	}
+	//GPIO_SetBits(GPIOD,GPIO_Pin_6);
 	while( !stop )
 	{
 		switch(mcuState)
 		{
 			case WaitCMD:
 			{
-				GPIO_ResetBits(GPIOE, GPIO_Pin_6);
+				//GPIO_ResetBits(GPIOE, GPIO_Pin_6);
 				GPIO_ResetBits(GPIOD, GPIO_Pin_12);
 				cmd = popQueueCmd();
 				if(cmd)
@@ -230,4 +222,31 @@ uint32_t getDoCmdTim()
 	return doCmdTim;
 }
 
+void TIM3_IRQHandler(void)
+{
+	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
+	{
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+		if(flag_counter == maxPeriodSpeed)
+		{	
+		if(countImpl > 0)
+			{
+				if(flag == 0)
+					{
+						GPIO_SetBits(GPIOB, GPIO_Pin_6);
+						flag = 1;
+					} else
+					{
+						GPIO_ResetBits(GPIOB, GPIO_Pin_6);
+						flag = 0;
+						countImpl --;
+					}
+		}
+			flag_counter = 0;
+		} else 
+		{
+			flag_counter++;
+		}
+	}
+}
 

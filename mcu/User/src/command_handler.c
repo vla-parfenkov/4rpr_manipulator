@@ -20,15 +20,6 @@
 double CurrentPosition[6] = {0,0,0,0,0,0};
 double Speed[6] = {0,0,0,0,0,0};
 volatile int TimeSec;
-
-void TIM3_IRQHandler(void)
-{
-        if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
-        {
-            TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-            TimeSec++;
-        }
-}
  
 
 //----------------------------------------------------------------------------------
@@ -193,7 +184,7 @@ void GoToPosition (double* NewPosition, double* NewSpeed)
 }
 
 
-void startTimer(TIM_TypeDef* TIMx)
+void startTimer(TIM_TypeDef* TIMx, uint16_t Period, uint16_t Prescaler)
 {
 	 TIM_TimeBaseInitTypeDef TIMER_InitStructure;
 	if (!TIMx)
@@ -202,11 +193,10 @@ void startTimer(TIM_TypeDef* TIMx)
    
     TIM_TimeBaseStructInit(&TIMER_InitStructure);
     TIMER_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIMER_InitStructure.TIM_Prescaler = 7200;
-    TIMER_InitStructure.TIM_Period = 10000;
+    TIMER_InitStructure.TIM_Prescaler = Prescaler;
+    TIMER_InitStructure.TIM_Period = Period;
     TIM_TimeBaseInit(TIMx, &TIMER_InitStructure);
     TIM_ITConfig(TIMx, TIM_IT_Update, ENABLE);
-		TimeSec = 0;
     TIM_Cmd(TIMx, ENABLE);
 	
 		TIM_SetCounter(TIMx, 0);
@@ -215,7 +205,7 @@ void startTimer(TIM_TypeDef* TIMx)
 
 void stopTimer(TIM_TypeDef* TIMx)
 {
-	TIM_Cmd(TIMx, ENABLE);
+	TIM_Cmd(TIMx, DISABLE);
 
 }
 

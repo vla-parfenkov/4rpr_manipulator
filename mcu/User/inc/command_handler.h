@@ -7,7 +7,7 @@
 //Передвинуть в ноль
 //void SetZero (void);
 
-void startTimer(TIM_TypeDef* TIMx);
+void startTimer(TIM_TypeDef* TIMx, uint16_t Period, uint16_t Prescaler);
 void stopTimer(TIM_TypeDef* TIMx);
 uint16_t getTimer(TIM_TypeDef* TIMx);
 void usartCmdHandler(char *cmd);
