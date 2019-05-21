@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SimMechanicsImportXML version="1.0" xmlns="urn:mathworks:simmechanics:import" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Created by="ANSYSVLAD" on="03/15/19||13:27:23" using="SimMechanics Link Version 4.6" from="Autodesk Inventor 2018 (Build 220112000, 112)"/>
+<ModelUnits mass="kilogram" length="millimeter"/>
+<DataUnits mass="kilogram" length="centimeter"/>
+<RootAssembly name="mm" uid="mm_12FC9124-4DB3-E5B8-B490-7EB98935A850" version="{DA182ECB-5AD6-3968-9379-9B4C775AAB2D}">
+<AssemblyFile name="mm.iam" type="Inventor Assembly"/>
+<InstanceTree>
+<Instance name="kr4:1" grounded="true" uid="kr4:1" entityUid="kr4_5C6DB36E-4A28-2513-3528-FF9BEAD815A8">
+<Transform>
+<Rotation>1 0 0 0 1 0 0 0 1</Rotation>
+<Translation>-0.28703703553210153 -0.7129629523389871 -2.2204460492503131e-016</Translation>
+</Transform>
+</Instance>
+<Instance name="kr2:1" uid="kr2:1" entityUid="kr2_013FECFC-475D-142A-A4E8-6883050EA2EA">
+<Transform>
+<Rotation>0.99185928964286707 0.12733871975617778 0 -0.12733871975617778 0.99185928964286707 0 0 0 1</Rotation>
+<Translation>0.73167272251731297 7.2219113648039537 4</Translation>
+</Transform>
+</Instance>
+</InstanceTree>
+<Constraints>
+<Coincident name="Совмещение:1">
+<ConstraintGeometry geomType="cylinder">
+<InstancePath>
+<Uid>kr2:1</Uid>
+</InstancePath>
+<Position>1.1102230246251565e-016 -8.0000000000000213 0</Position>
+<Axis>0 0 1</Axis>
+</ConstraintGeometry>
+<ConstraintGeometry geomType="cylinder">
+<InstancePath>
+<Uid>kr4:1</Uid>
+</InstancePath>
+<Position>0 0 0</Position>
+<Axis>0 0 1</Axis>
+</ConstraintGeometry>
+</Coincident>
+<Coincident name="Совмещение:2">
+<ConstraintGeometry geomType="plane">
+<InstancePath>
+<Uid>kr4:1</Uid>
+</InstancePath>
+<Position>0 0 2</Position>
+<Axis>0 0 1</Axis>
+</ConstraintGeometry>
+<ConstraintGeometry geomType="line">
+<InstancePath>
+<Uid>kr2:1</Uid>
+</InstancePath>
+<Position>2.0000000000000009 -10.000000000000002 -2</Position>
+<Axis>-4.0000000000000018 1.1102230246251565e-016 0</Axis>
+</ConstraintGeometry>
+</Coincident>
+</Constraints>
+</RootAssembly>
+<Assemblies>
+</Assemblies>
+<Parts>
+<Part name="kr2" uid="kr2_013FECFC-475D-142A-A4E8-6883050EA2EA" version="{39FD58FD-4273-AD4F-52AE-DD99A111F3F1}">
+<PartFile name="kr2.ipt" type="Inventor Part"/>
+<MassProperties>
+<Mass>0.30586283305884543</Mass>
+<CenterOfMass>3.6247426023412924e-012 -1.4867689099020887e-015 0</CenterOfMass>
+<Inertia>10.167717054457498 0.83249573818231926 10.184578571149563 -9.0949470177292826e-016 0 -2.7284841053204331e-015</Inertia>
+</MassProperties>
+<GeometryFile name="kr2_ipt_1247a2ad.STL" type="STL"/>
+<VisualProperties>
+<Ambient r="0.74901960784313726" g="0.74901960784313726" b="0.74901960784313726" a="1"/>
+<Diffuse r="0.74901960784313726" g="0.74901960784313726" b="0.74901960784313726" a="1"/>
+<Specular r="0" g="0" b="0" a="1"/>
+<Emissive r="0" g="0" b="0" a="1"/>
+<Shininess>0.14999999999999999</Shininess>
+</VisualProperties>
+</Part>
+<Part name="kr4" uid="kr4_5C6DB36E-4A28-2513-3528-FF9BEAD815A8" version="{5BBA4AAF-A757-6668-025E-AC3752870394}">
+<PartFile name="kr4.ipt" type="Inventor Part"/>
+<MassProperties>
+<Mass>0.13693141652942267</Mass>
+<CenterOfMass>4.0482822334017739e-012 0 0</CenterOfMass>
+<Inertia>0.61358120268124317 0.61358120242449266 0.86201196102727562 0 0 0</Inertia>
+</MassProperties>
+<GeometryFile name="kr4_ipt_3bad97a.STL" type="STL"/>
+<VisualProperties>
+<Ambient r="0.74901960784313726" g="0.74901960784313726" b="0.74901960784313726" a="1"/>
+<Diffuse r="0.74901960784313726" g="0.74901960784313726" b="0.74901960784313726" a="1"/>
+<Specular r="0" g="0" b="0" a="1"/>
+<Emissive r="0" g="0" b="0" a="1"/>
+<Shininess>0.14999999999999999</Shininess>
+</VisualProperties>
+</Part>
+</Parts>
+</SimMechanicsImportXML>

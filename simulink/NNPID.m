@@ -1,0 +1,13 @@
+function [out,Kp,Kv] = NNPID(x,ep,ev,ei, Kp0, Kv0)
+nup = 7*10^4;
+nuv = 100;
+YG = 0.8;
+Ki = 1;
+expTemp = exp(-2*x*YG);
+F = ((2*(1-expTemp))/(YG*(1 + expTemp)));
+Fd = ((4*expTemp)/(1 + expTemp)^2);
+deltaKp = nup * ep^2 * Fd;
+deltaKv = nuv * ep * ev * Fd;
+out = (x + Kp0*ep + Kv0*ev + Ki * ei)*F;
+Kp = Kp0 + deltaKp;
+Kv = Kv0 + deltaKv;
