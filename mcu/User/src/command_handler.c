@@ -232,7 +232,7 @@ void usartCmdHandler(char *cmd)
 	{
 		setMcuState(DoCMD);
 		timer_mcsXhun(START_T);
-		StartMotor (AXIS_Q1, REVERSE, 2);
+		StartMotor (AXIS_Q1, REVERSE, 2, 0);
 		USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
 	} 
 	else
@@ -244,7 +244,7 @@ void usartCmdHandler(char *cmd)
 			res = sscanf(cmd, "[%hi,%hi,%hi,%hi,%hi,%hi,%hi]", &x, &y, &thetta, &sx, &sy, &sthetta,&t);
 			if(res < 7)
 				return;
-			tS = (struct TrState*)malloc(sizeof(struct TrState) * 2);
+			/*tS = (struct TrState*)malloc(sizeof(struct TrState) * 2);
 			tS->tr = (struct Tr*)malloc(sizeof(struct Tr) * 2);
 			tS->speedTr = (struct SpeedTr*)malloc(sizeof(struct SpeedTr) * 2);
 			tS->t = (uint16_t*)malloc(sizeof(uint16_t) * 2);
@@ -267,7 +267,17 @@ void usartCmdHandler(char *cmd)
 			str->y = 0;
 			str->thetta = 0;
 			*tend = t; 
-			initTr(tS, 2);
+			initTr(tS, 2);*/
+			
+			tr = (struct Tr*)malloc(sizeof(struct Tr));
+			str	 = (struct SpeedTr*)malloc(sizeof(struct SpeedTr));
+			tr->x = x;
+			tr->y = y;
+			tr->thetta = thetta;
+			str->x = sx;
+			str->y = sy;
+			str->thetta = sthetta;
+			pushQueueTr(tr, str, STARTED);
 			setMcuState(DoCMD);
 			timer_mcsXhun(START_T);
 			USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);

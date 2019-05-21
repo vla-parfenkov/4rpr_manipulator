@@ -8,10 +8,7 @@ uint8_t flag_zero = 0; //флаг операции установки нуля
 uint8_t flag = 0;
 uint32_t time_count = 0;
 uint8_t SystikCount = 0;
-uint16_t countImpl = 3200;
-uint16_t flag_counter = 4; 
-bool stop = false;
-uint16_t maxPeriodSpeed = 50;
+bool stop;
 
 enum MCUState mcuState = WaitCMD;
 uint32_t doCmdTim = 0;
@@ -135,7 +132,7 @@ int main(void)
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 	GPIO_SetBits(GPIOD, GPIO_Pin_13);
 	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-	//GPIO_SetBits(GPIOD,GPIO_Pin_6);
+	GPIO_ResetBits(GPIOD,GPIO_Pin_6);
 	while( !stop )
 	{
 		switch(mcuState)
@@ -167,7 +164,7 @@ int main(void)
 				{
 					mcuState = WaitCMD;
 					initBuffer(&g_buf);
-					StartMotor(AXIS_Q1, FORWARD, 0);
+					StartMotor(AXIS_Q1, FORWARD, 0, 0);
 					if(currentState)
 						free(currentState);
 					if(lastState)
@@ -227,26 +224,7 @@ void TIM3_IRQHandler(void)
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
 	{
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-		if(flag_counter == maxPeriodSpeed)
-		{	
-		if(countImpl > 0)
-			{
-				if(flag == 0)
-					{
-						GPIO_SetBits(GPIOB, GPIO_Pin_6);
-						flag = 1;
-					} else
-					{
-						GPIO_ResetBits(GPIOB, GPIO_Pin_6);
-						flag = 0;
-						countImpl --;
-					}
-		}
-			flag_counter = 0;
-		} else 
-		{
-			flag_counter++;
-		}
+		motorQueueControl();	
 	}
 }
 

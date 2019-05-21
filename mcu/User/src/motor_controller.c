@@ -1,5 +1,12 @@
 #include "motor_controller.h"
 
+uint16_t minPeriodSpeed = 34;
+uint16_t taktMask[4];
+uint16_t countTakt[4];
+uint16_t sizeTakt[4];
+uint8_t motorFlag[4];
+
+
 double CalcSpeed (uint16_t TAKT, uint16_t MotorPin)
 {
 	double Mech = 60;
@@ -17,34 +24,40 @@ double CalcSpeed (uint16_t TAKT, uint16_t MotorPin)
 	return Speed;
 }
 
+uint16_t calcPeriod(double Speed)
+{
+	uint16_t res = (MIN_PERIOD_SPEED * 10) / Speed;
+	if(res < MIN_PERIOD_SPEED / 2)
+		res =  MIN_PERIOD_SPEED / 2;
+	return res;
+	
+}
+
+uint16_t calcImpl(uint16_t path)
+{
+	return path * 160;
+}
+
+
 
 //----------------------------------------------------------------------------------
 //Функция запускает указанный двигатель в указанном направлении с требуемой скоростью
 // Запуск занимает некоторое время требуемое на разгон
 //----------------------------------------------------------------------------------
-void StartMotor (uint16_t MotorPin, uint8_t Direction, double Speed)
+void StartMotor (uint16_t MotorPin, uint8_t Direction, double Speed, uint16_t path)
 {
-	TIM_TypeDef *TypeTim = 0;
-	
-	/*if ( MotorPin == AXIS_Z1 || MotorPin == AXIS_Z2){
-		TypeTim = TIM2;
-	} else {*/
-		TypeTim = TIM4;
-	//}
-	
 	if ( Direction == FORWARD){
-		//Push (SETBITS_COMMAND, 0, 0, MotorPin, 0, 0, 0, GPIOD);
 		GPIO_SetBits(GPIOD,MotorPin);
 	} else {
-		//Push (RESETBITS_COMMAND, 0, 0, MotorPin, 0, 0, 0, GPIOD);
 		GPIO_ResetBits(GPIOD,MotorPin);
 	}
 	
-	//Push (PWM_COMMAND, 0, TypeTim , MotorPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * CalcTAKT (Speed, MotorPin)), 0);
-	//Push (RESETBITS_COMMAND, 0, 0, MotorPin, 0, 0, 0, GPIOE);
-	PWM (TypeTim, MotorPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * CalcTAKT (Speed, MotorPin)));
 	GPIO_SetBits(GPIOE,MotorPin);
-
+	if(MotorPin == AXIS_Q1)
+	{
+		taktMask[0] = calcPeriod(Speed);
+		countTakt[0] = calcImpl(path);
+	}
 }
 
 //----------------------------------------------------------------------------------
@@ -56,7 +69,7 @@ void StopMotor (uint16_t MotorPin, double Speed)
 
 	//Push (SETBITS_COMMAND, 0, 0, MotorPin, 0, 0, 0, GPIOE);
 	//GPIO_SetBits(GPIOE,MotorPin);
-	StartMotor (MotorPin, FORWARD, 0);
+	StartMotor (MotorPin, FORWARD, 0, 0);
 }
 
 
@@ -213,10 +226,10 @@ void motorControlImpl(int16_t speed, int16_t lastSpeed, uint16_t MotorPin)
 	} 
 	else if (speed > 0)
 	{
-		StartMotor (MotorPin, FORWARD, speed);
+		StartMotor (MotorPin, FORWARD, speed, 0);
 	} else 
 	{
-		StartMotor (MotorPin, REVERSE, speed);
+		StartMotor (MotorPin, REVERSE, speed, 0);
 	}
 }
 
@@ -239,4 +252,100 @@ void motorControl(struct SpeedGenCoordinate speed, struct SpeedGenCoordinate las
 	
 }
 
+void readStateFromQueueEngine(uint8_t motorNumber)
+{
+	struct MechStateEngine state = popQueueTrEngine(motorNumber);
+	if(state.state == STOPED)
+	{
+		sizeTakt[motorNumber] = 1;
+		taktMask[motorNumber] = 0;
+	} else 
+	{
+		sizeTakt[motorNumber] = calcPeriod(state.speed);
+		taktMask[motorNumber] = calcImpl(state.tr);
+	}
+}
+
+void motorQueueControlImpl(uint8_t motorNumber)
+{
+	if(motorNumber > 3)
+		return;
+	
+	if(countTakt[motorNumber] == sizeTakt[motorNumber])
+	{	
+		if(taktMask[motorNumber] > 0)
+		{
+			if(motorFlag[motorNumber] == 0)
+			{
+				switch(motorNumber)
+				{
+					case 0: 
+					{
+						GPIO_SetBits(GPIOB, AXIS_Q1);
+						break;
+					}
+					case 1: 
+					{
+						GPIO_SetBits(GPIOB, AXIS_Q1);
+						break;
+					}
+					case 2: 
+					{
+						GPIO_SetBits(GPIOB, AXIS_Q1);
+						break;
+					}
+					case 3: 
+					{
+						GPIO_SetBits(GPIOB, AXIS_Q1);
+						break;
+					}
+					default: break;
+				}
+				motorFlag[motorNumber] = 1;
+			} else
+			{
+				switch(motorNumber)
+				{
+					case 0: 
+					{
+						GPIO_ResetBits(GPIOB, AXIS_Q1);
+						break;
+					}
+					case 1: 
+					{
+						GPIO_ResetBits(GPIOB, AXIS_Q2);
+						break;
+					}
+					case 2: 
+					{
+						GPIO_ResetBits(GPIOB, AXIS_Q3);
+						break;
+					}
+					case 3: 
+					{
+						GPIO_ResetBits(GPIOB, AXIS_Q4);
+						break;
+					}
+					default: break;
+				}
+				motorFlag[motorNumber] = 0;
+				taktMask[motorNumber] --;
+			}
+		} else
+		{
+			readStateFromQueueEngine(motorNumber);
+		}
+		countTakt[motorNumber] = 0;
+	} 
+	else 
+	{
+			countTakt[motorNumber]++;
+	}
+	
+}
+
+void motorQueueControl()
+{
+	
+}
 

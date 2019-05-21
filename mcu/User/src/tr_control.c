@@ -6,6 +6,9 @@
 
 struct TrState* trStates;
 enum TrControlState state = WAITSTART;
+uint32_t trQueuSize[4] = {0,0,0,0};
+struct QueueTrEngine **head = NULL;
+struct QueueTrEngine **tail = NULL;
 uint16_t trStatesSize = 0;
 uint16_t trStatesCount = 0;
 float a1 = 0.36 / 2; 
@@ -122,6 +125,9 @@ struct MechState* getMechStateByTime(uint16_t time)
 	if (speed)
 		free(speed);
 	
+	if(sgc)
+		free(sgc);
+	
 	return res;
 };
 
@@ -163,4 +169,121 @@ struct SpeedGenCoordinate* getSpeedGenCoordinateByTr(struct  Tr tr,
 		
 		return sgc;
 	}
+
+void pushQueueTrEngine(uint8_t number, struct MechStateEngine state)
+{
+	struct QueueTrEngine *tailEngine = *(tail + number);
+	struct QueueTrEngine *headEngine = *(head + number);
+	struct QueueTrEngine *newEngineCmd = tailEngine;
+	
+	if(number > 3)
+		return;
+	
+  tailEngine = (struct QueueTrEngine *)malloc(sizeof(struct QueueTrEngine ));
+	tailEngine->state = state;
+	tailEngine->next = NULL;
+  if (trQueuSize[number] == 0)
+    headEngine = tailEngine;
+  else 
+    newEngineCmd->next = tailEngine;
+  trQueuSize[number]++;
+}
+	
+void pushQueueTr(struct Tr *tr, struct SpeedTr *speedTr, enum TrControlState state)
+{
+	struct SecondGenCoordinate *sgc;
+	struct SpeedGenCoordinate *speed;
+	struct GenCoordinate *gc;
+	struct MechStateEngine mstate;
+	
+	if(!tr || !speedTr)
+		return;
+	
+	sgc = getSecondGenCoordinateByTr(*tr);
+	
+	if(!sgc)
+		return;
+	
+	gc = getGenCoordinateByTr(*tr);
+	if(!gc)
+	{
+		if(sgc)
+			free(sgc);
+		return;
+	}
+	
+	speed = getSpeedGenCoordinateByTr(*tr, *sgc, *speedTr);
+	
+	if(!speed)
+	{
+		if(sgc)
+			free(sgc);
+		if(gc)
+			free(gc);
+		return;
+	}
+	
+	if(speed->d1 != speed->d2 || speed->d3 != speed->d4)
+	{
+		if(speed)
+			free(speed);
+		if(sgc)
+			free(sgc);
+		if(gc)
+			free(gc);
+		return;
+	}
+	
+	mstate.speed  = speed->d1;
+	mstate.tr  = gc->d1;
+	mstate.state = state;
+	pushQueueTrEngine(0, mstate);
+	mstate.speed  = speed->d2;
+	mstate.tr  = gc->d2;
+	mstate.state = state;
+	pushQueueTrEngine(1, mstate);
+	mstate.speed  = speed->d3;
+	mstate.tr  = gc->d3;
+	mstate.state = state;
+	pushQueueTrEngine(2, mstate);
+	mstate.speed  = speed->d4;
+	mstate.tr  = gc->d4;
+	mstate.state = state;
+	pushQueueTrEngine(3, mstate);
+
+}
+struct MechStateEngine popQueueTrEngine(uint8_t engineNumber)
+{
+	struct QueueTrEngine *tr;
+	struct MechStateEngine res;
+	struct QueueTrEngine *headEngine = *(head + engineNumber);
+  tr = headEngine;
+	if(!tr)
+	{
+		res.state = STOPED;
+		return res;
+	}
+	trQueuSize[engineNumber]--;
+  headEngine = headEngine->next;
+	res = tr->state;
+	free(tr);
+  return res;
+}
+
+//need free
+struct GenCoordinate *getGenCoordinateByTr(struct  Tr tr)
+{
+		struct GenCoordinate *gc = (struct GenCoordinate *)malloc(sizeof(struct GenCoordinate));
+		
+		if (!gc)
+			return NULL;
+		
+		gc->d1 = sqrt (pow((tr.y - by1 + a1*sin(tr.thetta)),2) + pow((tr.x - bx1 + a1*cos(tr.thetta)),2));
+		gc->d2 = sqrt (pow((tr.y - by2 + a2*sin(tr.thetta)),2) + pow((tr.x - bx2 + a2*cos(tr.thetta)),2));
+		gc->d3 = sqrt (pow((tr.y - by3 + a3*sin(tr.thetta)),2) + pow((tr.x - bx3 + a3*cos(tr.thetta)),2));
+		gc->d4 = sqrt (pow((tr.y - by4 + a4*sin(tr.thetta)),2) + pow((tr.x - bx4 + a4*cos(tr.thetta)),2));
+		
+		return gc;
+	
+}
 	

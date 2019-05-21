@@ -2,6 +2,7 @@
 #define TR_CONTROL_H
 
 #include "stm32f4xx.h"
+#include <stdbool.h>
 
 enum TrControlState
 {
@@ -32,7 +33,7 @@ struct SecondGenCoordinate
 
 struct SpeedGenCoordinate
 {
-	int16_t d1, d2, d3, d4;
+	uint16_t d1, d2, d3, d4;
 };
 
 struct SpeedSecondGenCoordinate
@@ -43,6 +44,7 @@ struct SpeedSecondGenCoordinate
 struct MechState 
 {
 	struct SpeedGenCoordinate speed;
+	struct GenCoordinate tr;
 	enum TrControlState state;
 };
 
@@ -52,6 +54,24 @@ struct TrState
 	struct SpeedTr* speedTr; //size n - 1
 	uint16_t* t; //size n
 };
+
+struct MechStateEngine
+{
+	int16_t speed;
+	int16_t tr;
+	enum TrControlState state;
+};
+
+struct QueueTrEngine {
+	struct MechStateEngine state;
+	struct QueueTrEngine *next;
+};
+
+
+
+
+void pushQueueTr(struct Tr *tr, struct SpeedTr *speedTr, enum TrControlState state);
+struct MechStateEngine popQueueTrEngine(uint8_t engineNumber);
 
 
 void initTr(struct TrState* tS, uint16_t size);
