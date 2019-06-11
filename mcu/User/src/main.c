@@ -133,6 +133,7 @@ int main(void)
 	GPIO_SetBits(GPIOD, GPIO_Pin_13);
 	GPIO_SetBits(GPIOE, GPIO_Pin_6);
 	GPIO_ResetBits(GPIOD,GPIO_Pin_6);
+	
 	while( !stop )
 	{
 		switch(mcuState)
@@ -151,41 +152,9 @@ int main(void)
 			}
 			case DoCMD:
 			{
-				doCmdTim = timer_mcsXhun(SEE_T);
-				timeMS = doCmdTim / 10;
-				if(timeMS == 1000)
-					(void)timeMS;
-				currentState = getMechStateByTime(timeMS);
-				if(lastState)
-					motorControl(currentState->speed, lastState->speed);
-				else
-					motorControl(currentState->speed, zeroSpeed);
-				if(!currentState || currentState->state == STOPED)
-				{
-					mcuState = WaitCMD;
-					initBuffer(&g_buf);
-					StartMotor(AXIS_Q1, FORWARD, 0, 0);
-					if(currentState)
-						free(currentState);
-					if(lastState)
-						free(lastState);
-					currentState = NULL;
-					lastState = NULL;
-					deinitTr();
-					USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-				} else 
-				{
-					if(lastState)
-						free(lastState);
-					lastState = currentState;
-				}
-				/*if(doCmdTim >= 100000)
-				{
-					mcuState = WaitCMD;
-					StartMotor (AXIS_Q1, FORWARD, 0.0);
-					initBuffer(&g_buf);
-					USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-				}*/
+				mcuState = WaitCMD;
+				initBuffer(&g_buf);
+				USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 				break;
 			}
 			default:

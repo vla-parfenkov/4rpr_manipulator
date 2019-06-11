@@ -33,7 +33,7 @@ struct SecondGenCoordinate
 
 struct SpeedGenCoordinate
 {
-	uint16_t d1, d2, d3, d4;
+	int16_t d1, d2, d3, d4;
 };
 
 struct SpeedSecondGenCoordinate
@@ -70,20 +70,20 @@ struct QueueTrEngine {
 
 
 
-void pushQueueTr(struct Tr *tr, struct SpeedTr *speedTr, enum TrControlState state);
+void pushQueueTr(struct Tr tr, struct SpeedTr speedTr, enum TrControlState state);
 struct MechStateEngine popQueueTrEngine(uint8_t engineNumber);
 
 
 void initTr(struct TrState* tS, uint16_t size);
 void deinitTr();
 
-struct MechState* getMechStateByTime(uint16_t time);
+struct MechState *getMechStateByTime(uint16_t time);
 
-struct GenCoordinate* getGenCoordinateByTr(struct  Tr tr);
+struct GenCoordinate getGenCoordinateByTr(struct  Tr tr);
 
-struct SecondGenCoordinate* getSecondGenCoordinateByTr(struct  Tr tr);
+struct SecondGenCoordinate getSecondGenCoordinateByTr(struct  Tr tr);
 
-struct SpeedGenCoordinate* getSpeedGenCoordinateByTr(struct  Tr tr,
+struct SpeedGenCoordinate getSpeedGenCoordinateByTr(struct  Tr tr,
 struct SecondGenCoordinate sgc, struct  SpeedTr speedtr);
 
 //struct SecondGenCoordinate getSecondGenCoordinateByTr(struct  Tr );

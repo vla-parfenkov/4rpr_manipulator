@@ -25,7 +25,7 @@ class GUITask : public QObject
     Q_OBJECT
 public:
     explicit GUITask(QObject *parent = nullptr);
-    void handleMove(MoveDirection direction, uint32_t speed);
+    void handleMove(MoveDirection direction, int32_t speed);
     void connectToMCU();
     void handleGoToPosition();
 

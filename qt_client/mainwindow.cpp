@@ -43,12 +43,12 @@ void MainWindow::on_connectButton_clicked()
 
 void MainWindow::on_buttonUp_clicked()
 {
-    handler->handleMove(MoveUp, static_cast<uint32_t>(ui->ySpeed->value()));
+    handler->handleMove(MoveUp, static_cast<int32_t>(ui->ySpeed->value()));
 }
 
 void MainWindow::on_buttoDown_clicked()
 {
-     handler->handleMove(MoveDown, static_cast<uint32_t>(ui->ySpeed->value()));
+     handler->handleMove(MoveDown, static_cast<int32_t>(ui->ySpeed->value()));
 }
 
 
@@ -56,12 +56,12 @@ void MainWindow::on_buttoDown_clicked()
 
 void MainWindow::on_buttonRight_clicked()
 {
-     handler->handleMove(MoveRight, static_cast<uint32_t>(ui->xSpeed->value()));
+     handler->handleMove(MoveRight, static_cast<int32_t>(ui->xSpeed->value()));
 }
 
 void MainWindow::on_buttonLeft_clicked()
 {
-     handler->handleMove(MoveLeft, static_cast<uint32_t>(ui->xSpeed->value()));
+     handler->handleMove(MoveLeft, static_cast<int32_t>(ui->xSpeed->value()));
 }
 
 

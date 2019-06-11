@@ -252,6 +252,22 @@ void motorControl(struct SpeedGenCoordinate speed, struct SpeedGenCoordinate las
 	
 }
 
+uint16_t getMotorPin(uint8_t number)
+{
+	switch(number)
+	{
+		case 0: 
+			return AXIS_Q1;
+		case 1: 
+			return AXIS_Q2;
+		case 2: 
+			return AXIS_Q3;
+		case 3: 
+			return AXIS_Q4;
+		default: return 0;
+	}
+}
+
 void readStateFromQueueEngine(uint8_t motorNumber)
 {
 	struct MechStateEngine state = popQueueTrEngine(motorNumber);
@@ -261,6 +277,13 @@ void readStateFromQueueEngine(uint8_t motorNumber)
 		taktMask[motorNumber] = 0;
 	} else 
 	{
+		if(state.speed >= 0)
+			GPIO_SetBits(GPIOD,getMotorPin(motorNumber));
+		else
+		{
+			GPIO_ResetBits(GPIOD,getMotorPin(motorNumber));
+			state.speed = state.speed * (-1);
+		}
 		sizeTakt[motorNumber] = calcPeriod(state.speed);
 		taktMask[motorNumber] = calcImpl(state.tr);
 	}
@@ -277,57 +300,11 @@ void motorQueueControlImpl(uint8_t motorNumber)
 		{
 			if(motorFlag[motorNumber] == 0)
 			{
-				switch(motorNumber)
-				{
-					case 0: 
-					{
-						GPIO_SetBits(GPIOB, AXIS_Q1);
-						break;
-					}
-					case 1: 
-					{
-						GPIO_SetBits(GPIOB, AXIS_Q1);
-						break;
-					}
-					case 2: 
-					{
-						GPIO_SetBits(GPIOB, AXIS_Q1);
-						break;
-					}
-					case 3: 
-					{
-						GPIO_SetBits(GPIOB, AXIS_Q1);
-						break;
-					}
-					default: break;
-				}
+				GPIO_SetBits(GPIOB,getMotorPin(motorNumber));
 				motorFlag[motorNumber] = 1;
 			} else
 			{
-				switch(motorNumber)
-				{
-					case 0: 
-					{
-						GPIO_ResetBits(GPIOB, AXIS_Q1);
-						break;
-					}
-					case 1: 
-					{
-						GPIO_ResetBits(GPIOB, AXIS_Q2);
-						break;
-					}
-					case 2: 
-					{
-						GPIO_ResetBits(GPIOB, AXIS_Q3);
-						break;
-					}
-					case 3: 
-					{
-						GPIO_ResetBits(GPIOB, AXIS_Q4);
-						break;
-					}
-					default: break;
-				}
+				GPIO_ResetBits(GPIOB,getMotorPin(motorNumber));
 				motorFlag[motorNumber] = 0;
 				taktMask[motorNumber] --;
 			}
@@ -346,6 +323,8 @@ void motorQueueControlImpl(uint8_t motorNumber)
 
 void motorQueueControl()
 {
-	
+	int i = 0;
+	for (i = 0; i < 4; i++)
+		motorQueueControlImpl(i);
 }
 
