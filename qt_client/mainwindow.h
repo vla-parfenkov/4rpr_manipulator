@@ -37,6 +37,8 @@ private slots:
 
     void on_goToButton_clicked();
 
+    void on_setZero_clicked();
+
 private:
     Ui::MainWindow *ui;
     std::unique_ptr<GUITask> handler;

@@ -43,12 +43,12 @@ void MainWindow::on_connectButton_clicked()
 
 void MainWindow::on_buttonUp_clicked()
 {
-    handler->handleMove(MoveUp, static_cast<int32_t>(ui->ySpeed->value()));
+    handler->handleMove(MoveUp, ui->ySpeed->value());
 }
 
 void MainWindow::on_buttoDown_clicked()
 {
-     handler->handleMove(MoveDown, static_cast<int32_t>(ui->ySpeed->value()));
+     handler->handleMove(MoveDown, ui->ySpeed->value());
 }
 
 
@@ -56,12 +56,12 @@ void MainWindow::on_buttoDown_clicked()
 
 void MainWindow::on_buttonRight_clicked()
 {
-     handler->handleMove(MoveRight, static_cast<int32_t>(ui->xSpeed->value()));
+     handler->handleMove(MoveRight, ui->xSpeed->value());
 }
 
 void MainWindow::on_buttonLeft_clicked()
 {
-     handler->handleMove(MoveLeft, static_cast<int32_t>(ui->xSpeed->value()));
+     handler->handleMove(MoveLeft, ui->xSpeed->value());
 }
 
 
@@ -79,4 +79,12 @@ void MainWindow::on_angleSlide_valueChanged(int value)
 void MainWindow::on_goToButton_clicked()
 {
     handler->handleGoToPosition();
+}
+
+void MainWindow::on_setZero_clicked()
+{
+    ui->xPosition->display(0.0f);
+    ui->yPosition->display(343.443);
+    ui->axisPosition->display(0.0);
+    handler->setZero(0.0f, 343.443, 0.0);
 }

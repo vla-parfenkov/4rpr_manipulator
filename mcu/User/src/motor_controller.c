@@ -73,68 +73,6 @@ void StopMotor (uint16_t MotorPin, double Speed)
 }
 
 
-
-
-//----------------------------------------------------------------------------------
-//Функция линейно набирает требуемую скорость 
-//----------------------------------------------------------------------------------
-
-/*void Racing(uint16_t ReqFrequency, double Acceler, uint16_t MotorPin, uint16_t StartFrequency, double* deltaPosition)
-{
-	TIM_TypeDef *TypeTim = 0;
-
-	uint32_t CountPulse = 1; // текущая дискрета ускорения
-	uint16_t CountFrequency = StartFrequency; // текущая частота
-	float gSnum = StartFrequency - Acceler/(2 * StartFrequency); // считаем параметр старта
-	uint32_t Time = 10000 / StartFrequency; //время импульса в мс
-	float CountCoef = 0;
-	uint16_t CurrentPin = 0;
-	uint8_t i = 0;
-	uint16_t TestBit = 0x1000;
-  gSnum = gSnum * gSnum;
-	
-
-
-	
-	while ( CountFrequency < ReqFrequency){
-		TestBit = 0x1000;
-		for ( i = 1; i < 7; ++i) {
-			CurrentPin = (TestBit >> i) & MotorPin;
-			if (CurrentPin != 0){
-				//if ( CurrentPin == AXIS_Z1 || CurrentPin == AXIS_Z2){
-					//TypeTim = TIM2;
-				//} else {
-					TypeTim = TIM4;
-				//}
-				//Push (PWM_COMMAND, 0, TypeTim , CurrentPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * CountFrequency), 0);
-				//Push (DELAY_COMMAND, Time, 0, 0, 0, 0, 0, 0);
-				//deltaPosition [6 - i] = deltaPosition [6 - i] + CalcSpeed( CountFrequency, CurrentPin) / (double)Time;
-				PWM (TypeTim, CurrentPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * CountFrequency));
-				delay_mcsXhun(Time);
-		}
-		}	
-		CountCoef = (sqrt( gSnum + 2 * CountPulse * Acceler ) + sqrt( gSnum + 2 * (CountPulse - 1)* Acceler ));
-		Time = 20000 / CountCoef + 1;
-		CountFrequency = CountCoef / 2;
-		CountPulse++;
-	}	
-	
-		TestBit = 0x1000;
-		for ( i = 1; i < 7; ++i) {
-			CurrentPin = (TestBit >> i) & MotorPin;
-			if (CurrentPin != 0){
-				if ( CurrentPin == AXIS_Z1 || CurrentPin == AXIS_Z2){
-					TypeTim = TIM2;
-				} else {
-					TypeTim = TIM4;
-				}
-				//Push (PWM_COMMAND, 0, TypeTim , CurrentPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * ReqFrequency), 0);
-				PWM (TypeTim, CurrentPin, TIM_PERIOD, TIM_PULSE,  TIM_TAKT/(TIM_PERIOD * ReqFrequency));
-		}
-		}
-
-}*/
-
 //----------------------------------------------------------------------------------
 //Функция считает необходимую тактовую частоту  подачи импульсов, исходя из скорости 
 //--------------------------------------------------------------------------------
@@ -157,63 +95,6 @@ uint16_t CalcTAKT (double Speed, uint16_t MotorPin)
 	return (uint16_t)Freq;
 	
 }	
-
-//----------------------------------------------------------------------------------
-//Функция линейно замедляет двигатель
-//----------------------------------------------------------------------------------
-
-/*void Braking(uint16_t ReqFrequency, double Deceler, uint16_t MotorPin, uint16_t StartFrequency, double* deltaPosition)
-{
-	TIM_TypeDef *TypeTim = 0;
-
-	uint8_t CountPulse = 1; // текущая дискрета торможения
-	uint16_t CountFrequency = StartFrequency; // текущая частота
-	uint32_t Time = 10000 / StartFrequency; //время импульса в мс
-	float CountCoef = 0; 
-	uint16_t CurrentPin = 0;
-	uint8_t i = 0;
-	uint16_t TestBit = 0x1000;
-  
-
-	
-	while ( CountFrequency > ReqFrequency){
-		TestBit = 0x1000;
-		for ( i = 1; i < 7; ++i) {
-			CurrentPin = (TestBit >> i) & MotorPin;
-			if (CurrentPin != 0){
-				if ( CurrentPin == AXIS_Z1 || CurrentPin == AXIS_Z2){
-					TypeTim = TIM2;
-				} else {
-					TypeTim = TIM4;
-				}
-				//Push (PWM_COMMAND, 0, TypeTim , CurrentPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * CountFrequency), 0);
-				//Push (DELAY_COMMAND, Time, 0, 0, 0, 0, 0, 0);
-				//deltaPosition [6 - i] = deltaPosition [6 - i] + CalcSpeed( CountFrequency, CurrentPin) / (double)Time;
-				PWM (TypeTim, CurrentPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * CountFrequency));
-				delay_mcsXhun(Time);
-		}
-		}
-		CountCoef = (sqrt( StartFrequency * StartFrequency - 2 * CountPulse * Deceler ) + sqrt( StartFrequency * StartFrequency - 2 * (CountPulse - 1)* Deceler ));
-		Time = 20000 / CountCoef + 1;
-		CountFrequency = (CountCoef) /  2;
-		CountPulse++;
-	}		
-	
-		TestBit = 0x1000;
-		for ( i = 1; i < 7; ++i) {
-			CurrentPin = (TestBit >> i) & MotorPin;
-			if (CurrentPin != 0){
-				if ( MotorPin == AXIS_Z1 || MotorPin == AXIS_Z2){
-					TypeTim = TIM2;
-				} else {
-					TypeTim = TIM4;
-				}
-				//Push (PWM_COMMAND, 0, TypeTim , CurrentPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * ReqFrequency), 0);
-				PWM (TypeTim, CurrentPin, TIM_PERIOD, TIM_PULSE, TIM_TAKT/(TIM_PERIOD * ReqFrequency));
-		}
-		}
-	
-}*/
 
 void motorControlImpl(int16_t speed, int16_t lastSpeed, uint16_t MotorPin)
 {
@@ -277,15 +158,18 @@ void readStateFromQueueEngine(uint8_t motorNumber)
 		taktMask[motorNumber] = 0;
 	} else 
 	{
-		if(state.speed >= 0)
+		if(state.speed >= 0 || state.deltaTr >= 0)
 			GPIO_SetBits(GPIOD,getMotorPin(motorNumber));
 		else
 		{
 			GPIO_ResetBits(GPIOD,getMotorPin(motorNumber));
-			state.speed = state.speed * (-1);
+			if(state.speed < 0) 
+				state.speed = state.speed * (-1);
+			if(state.deltaTr < 0)
+				state.deltaTr = state.deltaTr * (-1);
 		}
 		sizeTakt[motorNumber] = calcPeriod(state.speed);
-		taktMask[motorNumber] = calcImpl(state.tr);
+		taktMask[motorNumber] = calcImpl(state.deltaTr);
 	}
 }
 

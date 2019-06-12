@@ -7,7 +7,7 @@
 
 namespace GUITaskConstant
 {
-  static const uint32_t diskret = 2;
+  static const uint32_t diskret = 1;
 }
 
 enum MoveDirection
@@ -25,22 +25,22 @@ class GUITask : public QObject
     Q_OBJECT
 public:
     explicit GUITask(QObject *parent = nullptr);
-    void handleMove(MoveDirection direction, int32_t speed);
+    void handleMove(MoveDirection direction, float speed);
+    void setZero(float X, float Y, float thetta);
     void connectToMCU();
     void handleGoToPosition();
 
 signals:
-    void changePosition(int32_t x, int32_t y, int32_t angle);
+    void changePosition(float x, float y, float angle);
     void errorTask(const QString &err);
 
 public slots:
 
 private:
-    int32_t currentX;
-    int32_t currentY;
-    int32_t currentAngle;
+    float currentX;
+    float currentY;
+    float currentAngle;
     std::unique_ptr<MCUConnection> conn;
-
 
 };
 

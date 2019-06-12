@@ -1,4 +1,5 @@
 #include "guitask.h"
+#include <QTextStream>
 
 GUITask::GUITask(QObject *parent) :
     QObject(parent),
@@ -9,68 +10,72 @@ GUITask::GUITask(QObject *parent) :
     conn =  std::make_unique<MCUConnection>();
 }
 
-void GUITask::handleMove(MoveDirection direction, int32_t speed)
+void GUITask::handleMove(MoveDirection direction, float speed)
 {
+    float speedX = 0, speedY = 0, speedThetta = 0;
     switch (direction)
     {
-        case MoveUp:
+        case MoveRight:
         {
-            int32_t newXpossition = currentX + static_cast<int32_t>(speed * GUITaskConstant::diskret);
-            QString cmd = "[" + QString::number(speed * GUITaskConstant::diskret) + ",0,0,"
-                    + QString::number(speed) + ",0,0," + QString::number(GUITaskConstant::diskret * 1000) + "]";
-            conn->sendCmd(cmd);
+            float newXpossition = currentX + (speed * GUITaskConstant::diskret);
+            speedX = speed;
             currentX = newXpossition;
             break;
         }
-    case MoveDown:
+    case MoveLeft:
     {
-        int32_t newXpossition = currentX - static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        QString cmd = "[" + QString::number(speed * GUITaskConstant::diskret) + ",0,0,"
-                + QString::number(speed * (-1)) + ",0,0," + QString::number(GUITaskConstant::diskret * 1000) + "]";
-        conn->sendCmd(cmd);
+        float newXpossition = currentX - (speed * GUITaskConstant::diskret);
+        speedX = speed * (-1);
         currentX = newXpossition;
         break;
     }
-    case MoveLeft:
+    case MoveDown:
     {
-        int32_t newYpossition = currentY - static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        QString cmd = "[0," + QString::number(speed * GUITaskConstant::diskret) + ",0,0,"
-                + QString::number(speed * (-1)) + ",0," + QString::number(GUITaskConstant::diskret * 1000) + "]";
-        conn->sendCmd(cmd);
+        float newYpossition = currentY - (speed * GUITaskConstant::diskret);
+        speedY = speed * (-1);
         currentY = newYpossition;
         break;
     }
-    case MoveRight:
+    case MoveUp:
     {
-        int32_t newYpossition = currentY + static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        QString cmd = "[0," + QString::number(speed * GUITaskConstant::diskret) + ",0,0,"
-                + QString::number(speed) + ",0," + QString::number(GUITaskConstant::diskret * 1000) + "]";
-        conn->sendCmd(cmd);
+        float newYpossition = currentY + (speed * GUITaskConstant::diskret);
+        speedY = speed;
         currentY = newYpossition;
         break;
     }
     case MoveAngleRight:
     {
-        int32_t newAnglePosition = currentAngle + static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        QString cmd = "[0,0," +QString::number(speed * GUITaskConstant::diskret) + ",0,0,"
-                + QString::number(speed) + "," + QString::number(GUITaskConstant::diskret * 1000) + "]";
-        conn->sendCmd(cmd);
+        float newAnglePosition = currentAngle + (speed * GUITaskConstant::diskret);
+        speedThetta = speed;
         currentAngle = newAnglePosition;
         break;
     }
     case MoveAngleLeft:
     {
-        int32_t newAnglePosition = currentAngle - static_cast<int32_t>(speed * GUITaskConstant::diskret);
-        QString cmd = "[0,0," + QString::number(speed * GUITaskConstant::diskret) + ",0,0,"
-                + QString::number(speed * (-1)) + "," + QString::number(GUITaskConstant::diskret * 1000) + "]";
-        conn->sendCmd(cmd);
+        float newAnglePosition = currentAngle - (speed * GUITaskConstant::diskret);
+        speedThetta = speed * (-1);
         currentAngle = newAnglePosition;
         break;
     }
     default:
         return;
     }
+    QString cmd;
+    QTextStream out(&cmd);
+    out << "[" << currentX << "," << currentY << "," << currentAngle
+        << "," << speedX << "," << speedY << ","  << speedThetta
+        << "," << QString::number(GUITaskConstant::diskret * 1000) << "]";
+
+    conn->sendCmd(cmd);
+
     emit changePosition(currentX, currentY, currentAngle);
+}
+
+void GUITask::setZero(float X, float Y, float thetta)
+{
+    currentX = X;
+    currentY = Y;
+    currentAngle = thetta;
 }
 
 void GUITask::connectToMCU()
