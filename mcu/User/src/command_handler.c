@@ -237,9 +237,10 @@ void usartCmdHandler(char *cmd)
 	{
 		if(cmd[0] == '[')
 		{
-			int16_t x,y,thetta,sx,sy,sthetta,t;
+			float x,y,thetta,sx,sy,sthetta;
+			int16_t t;
 			
-			res = sscanf(cmd, "[%hi,%hi,%hi,%hi,%hi,%hi,%hi]", &x, &y, &thetta, &sx, &sy, &sthetta,&t);
+			res = sscanf(cmd, "[%f,%f,%f,%f,%f,%f,%hi]", &x, &y, &thetta, &sx, &sy, &sthetta,&t);
 			if(res < 7)
 				return;
 			

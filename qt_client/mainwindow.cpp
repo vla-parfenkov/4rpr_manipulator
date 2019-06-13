@@ -84,7 +84,7 @@ void MainWindow::on_goToButton_clicked()
 void MainWindow::on_setZero_clicked()
 {
     ui->xPosition->display(0.0f);
-    ui->yPosition->display(343.443);
+    ui->yPosition->display(372.625);
     ui->axisPosition->display(0.0);
-    handler->setZero(0.0f, 343.443, 0.0);
+    handler->setZero(0.0f, 372.625, 0.0);
 }

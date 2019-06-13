@@ -11,7 +11,7 @@ struct QueueTrEngine *head[4];
 struct QueueTrEngine *tail[4];
 uint16_t trStatesSize = 0;
 uint16_t trStatesCount = 0;
-struct Tr currentTr = {0.0, 343.443, 0.0};
+struct Tr currentTr = {0.0,  372.625, 0.0};
 struct GenCoordinate currentGC = {538.0, 538.0, 538.0, 538.0};
 //мм
 float a1 = 150.0; 
@@ -56,23 +56,45 @@ void deinitTr()
 	free(trStates);
 }
 
-struct SpeedGenCoordinate getSpeedGenCoordinateByTr(struct  Tr tr,
-	struct SecondGenCoordinate sgc, struct  SpeedTr speedtr)
+bool checkSpace(struct GenCoordinate gc)
+{
+	if(gc.d1 < 537.0 || gc.d2 < 537.0 || gc.d3 < 538.0 || gc.d4 < 538.0)
 	{
-		struct SpeedGenCoordinate spgc;
-		float sth = sin(tr.thetta);
-		float cth = cos(tr.thetta);
-		spgc.d1 = cos(sgc.a1)* speedtr.x + sin(sgc.a1) * speedtr.y + a1 * (cth * sin(sgc.a1) 
-				- sth * cos(sgc.a1)) * speedtr.thetta;
-		spgc.d2 = cos(sgc.a2)* speedtr.x + sin(sgc.a2) * speedtr.y + a2 * (cth * sin(sgc.a2) 
-				- sth * cos(sgc.a2)) * speedtr.thetta;
-		spgc.d3 = cos(sgc.a3)* speedtr.x + sin(sgc.a3) * speedtr.y + a3 * (cth * sin(sgc.a3) 
-				- sth * cos(sgc.a3)) * speedtr.thetta;
-		spgc.d4 = cos(sgc.a4)* speedtr.x + sin(sgc.a4) * speedtr.y + a4 * (cth * sin(sgc.a4) 
-				- sth * cos(sgc.a4)) * speedtr.thetta;
-		
-		return spgc;
+		return false;
 	}
+	
+	if(gc.d1 > 838.0 || gc.d2 > 838.0 || gc.d3 > 838.0 || gc.d4 > 838.0)
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+struct SpeedGenCoordinate getSpeedGenCoordinateByTr(struct  Tr tr,
+    struct GenCoordinate gc, struct  SpeedTr speedtr)
+{
+        struct SpeedGenCoordinate spgc;
+        float sth = sin(tr.thetta);
+        float cth = cos(tr.thetta);
+        spgc.d1 =  (((tr.x + cy * sth)  - bx1 + a1 * cth)
+                * (speedtr.x + cy * cth * speedtr.thetta - a1 * sth * speedtr.thetta)
+                + ((tr.y + cy * cth) - by1 + a1 * sth)
+                * (speedtr.y - cy * sth * speedtr.thetta + a1 * cth * speedtr.thetta)) / gc.d1;
+        spgc.d2 =  (((tr.x + cy * sth)  - bx2 + a2 * cth)
+                * (speedtr.x + cy * cth * speedtr.thetta - a2 * sth * speedtr.thetta)
+                + ((tr.y + cy * cth) - by2 + a1 * sth)
+                * (speedtr.y - cy * sth * speedtr.thetta + a2 * cth * speedtr.thetta)) / gc.d2;
+        spgc.d3 =  (((tr.x + cy * sth)  - bx3 + a3 * cth)
+                * (speedtr.x + cy * cth * speedtr.thetta - a3 * sth * speedtr.thetta)
+                + ((tr.y + cy * cth) - by3 + a3 * sth)
+                * (speedtr.y - cy * sth * speedtr.thetta + a3 * cth * speedtr.thetta)) / gc.d3;
+        spgc.d4 =  (((tr.x + cy * sth)  - bx4 + a4 * cth)
+                * (speedtr.x + cy * cth * speedtr.thetta - a4 * sth * speedtr.thetta)
+                + ((tr.y + cy * cth) - by4 + a4 * sth)
+                * (speedtr.y - cy * sth * speedtr.thetta + a4 * cth * speedtr.thetta)) / gc.d4;
+        return spgc;
+}
 	
 	
 	struct SecondGenCoordinate getSecondGenCoordinateByTr(struct  Tr tr)
@@ -112,16 +134,16 @@ void pushQueueTrEngine(uint8_t number, struct MechStateEngine state)
 	
 void pushQueueTr(struct Tr tr, struct SpeedTr speedTr, enum TrControlState state)
 {
-	struct SecondGenCoordinate sgc;
 	struct SpeedGenCoordinate speed;
 	struct GenCoordinate gc;
 	struct MechStateEngine mstate;
-		
-	sgc = getSecondGenCoordinateByTr(tr);
 	
 	gc = getGenCoordinateByTr(tr);
 	
-	speed = getSpeedGenCoordinateByTr(tr, sgc, speedTr);
+	speed = getSpeedGenCoordinateByTr(tr, gc, speedTr);
+
+	if(!checkSpace(gc))
+		return;
 	
 	mstate.speed  = speed.d1;
 	mstate.deltaTr  = gc.d1 - currentGC.d1;
@@ -165,10 +187,10 @@ struct GenCoordinate getGenCoordinateByTr(struct  Tr tr)
 		struct GenCoordinate gc;
 		float sth = sin(tr.thetta);
 		float cth = cos(tr.thetta);
-		gc.d1 = sqrt(pow(((tr.y + cy * sth) - by1 + a1 * sth),2) + pow((tr.x - bx1 + a1 * cth),2));
-		gc.d2 = sqrt(pow(((tr.y + cy * sth) - by2 + a2 * sth),2) + pow((tr.x - bx2 + a2 * cth),2));
-		gc.d3 = sqrt(pow(((tr.y + cy * sth) - by3 + a3 * sth),2) + pow((tr.x - bx3 + a3 * cth),2));
-		gc.d4 = sqrt(pow(((tr.y + cy * sth) - by4 + a4 * sth),2) + pow((tr.x - bx4 + a4 * cth),2));
+    gc.d1 = sqrt(pow(((tr.y + cy * cth) - by1 + a1 * sth),2) + pow(((tr.x + cy * sth)  - bx1 + a1 * cth),2));
+    gc.d2 = sqrt(pow(((tr.y + cy * cth) - by2 + a2 * sth),2) + pow(((tr.x + cy * sth) - bx2 + a2 * cth),2));
+    gc.d3 = sqrt(pow(((tr.y + cy * cth) - by3 + a3 * sth),2) + pow(((tr.x + cy * sth) - bx3 + a3 * cth),2));
+    gc.d4 = sqrt(pow(((tr.y + cy * cth) - by4 + a4 * sth),2) + pow(((tr.x + cy * sth) - bx4 + a4 * cth),2));
 		
 		return gc;
 	

@@ -88,6 +88,7 @@ int main(void)
 	char *cmd = NULL;
 	uint16_t timeMS;
 	int i = 0;
+	int j = 0;
 	uint8_t flagTest = 0;
 	uint16_t timPrescaler = (uint16_t)TIM_TAKT / 1000 - 1;
 	uint16_t timPeriod = 10;
@@ -131,9 +132,16 @@ int main(void)
 	NVIC_EnableIRQ(TIM3_IRQn);
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 	GPIO_SetBits(GPIOD, GPIO_Pin_13);
-	GPIO_SetBits(GPIOE, GPIO_Pin_6);
-	GPIO_ResetBits(GPIOD,GPIO_Pin_6);
+	GPIO_SetBits(GPIOE, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4);
+	GPIO_ResetBits(GPIOD, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4);
 	
+	/*for(i = 0; i < 1600; i++)
+	{
+		GPIO_SetBits(GPIOB, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4);
+		delay_mcsXhun(100);
+		GPIO_ResetBits(GPIOB, AXIS_Q1| AXIS_Q2| AXIS_Q3 |AXIS_Q4);
+		delay_mcsXhun(100);
+	}*/
 	while( !stop )
 	{
 		switch(mcuState)

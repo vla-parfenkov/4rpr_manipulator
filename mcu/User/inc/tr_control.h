@@ -82,7 +82,7 @@ struct GenCoordinate getGenCoordinateByTr(struct  Tr tr);
 struct SecondGenCoordinate getSecondGenCoordinateByTr(struct  Tr tr);
 
 struct SpeedGenCoordinate getSpeedGenCoordinateByTr(struct  Tr tr,
-struct SecondGenCoordinate sgc, struct  SpeedTr speedtr);
+    struct GenCoordinate gc, struct  SpeedTr speedtr);
 
 //struct SecondGenCoordinate getSecondGenCoordinateByTr(struct  Tr );
 

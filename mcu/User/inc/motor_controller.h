@@ -22,7 +22,7 @@
 typedef uint8_t					Bool; 
 
 //старт двигатель
-void StartMotor (uint16_t MotorPin, uint8_t Direction, double Speed, uint16_t path);
+void StartMotor (uint16_t MotorPin, uint8_t Direction, double Speed, float path);
 
 //остановить двигатель
 void StopMotor (uint16_t MotorPin, double Speed);

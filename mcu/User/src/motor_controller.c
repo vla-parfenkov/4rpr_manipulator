@@ -26,14 +26,14 @@ double CalcSpeed (uint16_t TAKT, uint16_t MotorPin)
 
 uint16_t calcPeriod(double Speed)
 {
-	uint16_t res = (MIN_PERIOD_SPEED * 10) / Speed;
+	int16_t res = (MIN_PERIOD_SPEED * 10) / Speed;
 	if(res < MIN_PERIOD_SPEED / 2)
 		res =  MIN_PERIOD_SPEED / 2;
 	return res;
 	
 }
 
-uint16_t calcImpl(uint16_t path)
+uint16_t calcImpl(float path)
 {
 	return path * 160;
 }
@@ -44,7 +44,7 @@ uint16_t calcImpl(uint16_t path)
 //Функция запускает указанный двигатель в указанном направлении с требуемой скоростью
 // Запуск занимает некоторое время требуемое на разгон
 //----------------------------------------------------------------------------------
-void StartMotor (uint16_t MotorPin, uint8_t Direction, double Speed, uint16_t path)
+void StartMotor (uint16_t MotorPin, uint8_t Direction, double Speed, float path)
 {
 	if ( Direction == FORWARD){
 		GPIO_SetBits(GPIOD,MotorPin);
@@ -96,42 +96,6 @@ uint16_t CalcTAKT (double Speed, uint16_t MotorPin)
 	
 }	
 
-void motorControlImpl(int16_t speed, int16_t lastSpeed, uint16_t MotorPin)
-{
-	if(speed == lastSpeed)
-		return;
-		
-	if(speed == 0) 
-	{
-		StopMotor(MotorPin, speed);
-	} 
-	else if (speed > 0)
-	{
-		StartMotor (MotorPin, FORWARD, speed, 0);
-	} else 
-	{
-		StartMotor (MotorPin, REVERSE, speed, 0);
-	}
-}
-
-void motorControl(struct SpeedGenCoordinate speed, struct SpeedGenCoordinate lastSpeed)
-{
-	if(speed.d1 > 100 && speed.d2 > 100 && speed.d3 > 100 && speed.d4 > 100)
-	{
-		StopMotor(AXIS_Q1, 0);
-		StopMotor(AXIS_Q2, 0);
-		StopMotor(AXIS_Q3, 0);
-		StopMotor(AXIS_Q4, 0);
-		return;
-	}
-	
-	motorControlImpl(speed.d1, lastSpeed.d1, AXIS_Q1);
-	motorControlImpl(speed.d2, lastSpeed.d2, AXIS_Q2);
-	motorControlImpl(speed.d3, lastSpeed.d3, AXIS_Q3);
-	motorControlImpl(speed.d4, lastSpeed.d4, AXIS_Q4);
-	
-	
-}
 
 uint16_t getMotorPin(uint8_t number)
 {
